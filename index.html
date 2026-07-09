@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>소셜 콘텐츠 자동 검수 시스템 v2</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<script src="https://js.puter.com/v2/"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#1B3A6B;--blue:#2E75B6;--blue-l:#E8F2FB;
+  --red:#C0392B;--red-l:#FDECEA;--red-d:#922B21;
+  --amber:#92600A;--amber-l:#FEF3DC;--amber-b:#F5C57A;
+  --green:#1A7A4A;--green-l:#E8F6EE;--green-b:#8FCB9B;
+  --purple:#6B21A8;--purple-l:#F5F0FF;
+  --g0:#fff;--g1:#F7F8FA;--g2:#F0F2F5;--g3:#E4E7EC;
+  --g4:#9CA3AF;--g5:#6B7280;--g6:#374151;--g7:#111827;
+  --r:8px;--font:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans KR',sans-serif;
+}
+body{font-family:var(--font);background:#EEF2F8;color:var(--g7);min-height:100vh;padding:24px 16px 60px}
+.page{max-width:720px;margin:0 auto}
+
+/* Header */
+.hdr{background:var(--navy);border-radius:16px;padding:22px 26px;margin-bottom:16px;display:flex;align-items:center;gap:14px}
+.hdr-ico{width:48px;height:48px;background:rgba(255,255,255,.15);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:24px;color:#fff;flex-shrink:0}
+.hdr h1{font-size:17px;font-weight:700;color:#fff;margin-bottom:3px}
+.hdr p{font-size:12px;color:rgba(255,255,255,.65);line-height:1.5}
+.badges{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px}
+.badge{display:inline-flex;align-items:center;gap:4px;background:rgba(255,255,255,.15);color:#fff;border-radius:20px;font-size:11px;font-weight:700;padding:3px 10px}
+
+/* Card */
+.card{background:var(--g0);border-radius:14px;padding:18px 20px;margin-bottom:14px;border:1px solid var(--g3)}
+.card-ttl{font-size:12px;font-weight:700;color:var(--g5);text-transform:uppercase;letter-spacing:.05em;margin-bottom:14px;display:flex;align-items:center;gap:5px}
+.card-ttl i{font-size:14px;color:var(--blue)}
+
+/* Info */
+.info-banner{background:var(--green-l);border:1.5px solid var(--green-b);border-radius:12px;padding:14px 16px;margin-bottom:14px;display:flex;align-items:flex-start;gap:10px}
+.info-banner i{font-size:20px;color:var(--green);flex-shrink:0;margin-top:1px}
+.info-banner p{font-size:13px;color:#145A38;line-height:1.6}
+
+/* Upload */
+.upload-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.ubox{border:2px dashed var(--g3);border-radius:12px;padding:18px 12px;cursor:pointer;text-align:center;background:var(--g1);transition:border-color .15s,background .15s;min-height:110px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start}
+.ubox:hover{border-color:var(--blue);background:var(--blue-l)}
+.ubox.on{border-style:solid;border-color:var(--blue);background:var(--blue-l)}
+.ubox .ui{font-size:28px;color:var(--g4);margin-bottom:6px}
+.ubox.on .ui{color:var(--blue)}
+.ubox .ul{font-size:13px;font-weight:600;color:var(--g5)}
+.ubox.on .ul{color:var(--blue)}
+.ubox .us{font-size:11px;color:var(--g4);margin-top:2px}
+.pg{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px;justify-content:center}
+.pi{position:relative;width:48px;height:48px}
+.pi img{width:48px;height:48px;object-fit:cover;border-radius:6px;border:1px solid var(--g3);display:block}
+.pi .vt{width:48px;height:48px;background:var(--g2);border-radius:6px;display:flex;align-items:center;justify-content:center;border:1px solid var(--g3)}
+.pi .vt i{font-size:18px;color:var(--g4)}
+.pi .rb{position:absolute;top:-5px;right:-5px;width:15px;height:15px;border-radius:50%;background:var(--g6);color:#fff;border:none;cursor:pointer;font-size:10px;display:flex;align-items:center;justify-content:center}
+input[type=file]{display:none}
+
+.fl{font-size:12px;font-weight:600;color:var(--g6);display:block;margin-bottom:6px}
+textarea{width:100%;min-height:96px;font-size:14px;font-family:var(--font);padding:11px 13px;border-radius:var(--r);border:1.5px solid var(--g3);background:var(--g1);color:var(--g7);resize:vertical;transition:border-color .15s}
+textarea:focus{outline:none;border-color:var(--blue);background:#fff}
+textarea::placeholder{color:var(--g4)}
+.ctx{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px;margin-bottom:16px}
+select,input[type=date]{width:100%;font-size:13px;font-family:var(--font);padding:9px 11px;border-radius:var(--r);border:1.5px solid var(--g3);background:var(--g1);color:var(--g7);cursor:pointer}
+select:focus,input[type=date]:focus{outline:none;border-color:var(--blue)}
+
+/* Buttons */
+.btn-run{width:100%;padding:13px;border-radius:10px;border:none;background:var(--navy);color:#fff;font-size:15px;font-weight:700;font-family:var(--font);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:background .15s}
+.btn-run:hover{background:#152E56}
+.btn-run:disabled{background:var(--g3);color:var(--g4);cursor:not-allowed}
+.btn-run i{font-size:18px}
+.btn-hint{font-size:12px;color:var(--g4);text-align:center;margin-top:7px}
+.btn-reset{display:block;width:100%;margin-top:10px;padding:10px;border-radius:var(--r);border:1.5px solid var(--g3);background:var(--g0);font-size:13px;color:var(--g5);font-family:var(--font);cursor:pointer}
+.btn-reset:hover{background:var(--g1)}
+
+/* Loading */
+.loading{text-align:center;padding:40px 20px}
+.spinner{width:38px;height:38px;border:3px solid var(--g3);border-top-color:var(--blue);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 12px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading p{font-size:14px;color:var(--g6)}
+.lstep{font-size:12px;color:var(--g4);margin-top:5px}
+
+/* Pre-check alerts */
+.pre-alert{border-radius:10px;padding:12px 14px;margin-bottom:10px;display:none}
+.pre-alert.date-type{background:#FFF3F3;border:2px solid #E74C3C}
+.pre-alert.keyword-type{background:#FFF8F0;border:2px solid #E67E22}
+.pre-alert.combo-type{background:#F8F0FF;border:2px solid #8B5CF6}
+.pre-alert-ttl{font-size:12px;font-weight:700;display:flex;align-items:center;gap:5px;margin-bottom:6px}
+.pre-alert.date-type .pre-alert-ttl{color:#C0392B}
+.pre-alert.keyword-type .pre-alert-ttl{color:#D35400}
+.pre-alert.combo-type .pre-alert-ttl{color:#6B21A8}
+.pre-alert-body{font-size:12px;color:var(--g6);line-height:1.7}
+.pre-alert-body strong{font-weight:700}
+.pre-alert.date-type .pre-alert-body strong{color:#C0392B}
+.pre-alert.keyword-type .pre-alert-body strong{color:#D35400}
+.pre-alert.combo-type .pre-alert-body strong{color:#6B21A8}
+
+/* Result Banner */
+.banner{border-radius:12px;padding:16px 18px;margin-bottom:12px;display:flex;align-items:center;gap:12px}
+.banner.pass{background:var(--green-l);border:1.5px solid var(--green-b)}
+.banner.warn{background:var(--amber-l);border:1.5px solid var(--amber-b)}
+.banner.fail{background:var(--red-l);border:1.5px solid #F0A0A0}
+.banner.block{background:#F5F0FF;border:2px solid #8B5CF6}
+.banner .bico{font-size:30px;flex-shrink:0}
+.banner.pass .bico{color:var(--green)}
+.banner.warn .bico{color:var(--amber)}
+.banner.fail .bico,.banner.block .bico{color:var(--red-d)}
+.btxt{flex:1}
+.bv{font-size:17px;font-weight:700;color:var(--g7)}
+.br{font-size:12px;color:var(--g5);margin-top:3px;line-height:1.5}
+.bs{font-size:32px;font-weight:700;flex-shrink:0}
+.banner.pass .bs{color:var(--green)}
+.banner.warn .bs{color:var(--amber)}
+.banner.fail .bs,.banner.block .bs{color:var(--red-d)}
+.bsu{font-size:14px;font-weight:400}
+
+/* Level badge */
+.level-badge{display:inline-flex;align-items:center;gap:4px;border-radius:6px;font-size:11px;font-weight:700;padding:4px 10px;margin-bottom:14px}
+.level-badge.l0{background:var(--green-l);color:var(--green);border:1px solid var(--green-b)}
+.level-badge.l1{background:#EFF6FF;color:#1D4ED8;border:1px solid #93C5FD}
+.level-badge.l2{background:var(--amber-l);color:var(--amber);border:1px solid var(--amber-b)}
+.level-badge.l3{background:var(--red-l);color:var(--red);border:1px solid #F0A0A0}
+.level-badge.l4{background:#F5F0FF;color:var(--purple);border:1px solid #C4B5FD}
+
+/* Alert boxes in result */
+.alert-box{border-radius:10px;padding:12px 14px;margin-bottom:8px}
+.alert-box.date{background:#FFF3F3;border:2px solid #E74C3C}
+.alert-box.keyword{background:#FFF8F0;border:2px solid #E67E22}
+.alert-box.combo{background:#F8F0FF;border:2px solid #8B5CF6}
+.alert-box.gender{background:#FFF0F6;border:2px solid #EC4899}
+.alert-box-ttl{font-size:12px;font-weight:700;display:flex;align-items:center;gap:5px;margin-bottom:5px}
+.alert-box.date .alert-box-ttl{color:#C0392B}
+.alert-box.keyword .alert-box-ttl{color:#D35400}
+.alert-box.combo .alert-box-ttl{color:#6B21A8}
+.alert-box.gender .alert-box-ttl{color:#BE185D}
+.alert-box-body{font-size:12px;color:var(--g6);line-height:1.65}
+.alert-box-body strong{font-weight:700}
+
+/* Check items */
+.cgroup{margin-bottom:16px}
+.cg-lbl{font-size:11px;font-weight:700;color:var(--g4);text-transform:uppercase;letter-spacing:.07em;margin-bottom:7px;padding-left:2px}
+.ci{display:flex;align-items:flex-start;gap:9px;padding:10px 13px;border-radius:var(--r);border:1px solid var(--g3);background:var(--g1);margin-bottom:5px}
+.ci.ok{background:var(--green-l);border-color:var(--green-b)}
+.ci.warn{background:var(--amber-l);border-color:var(--amber-b)}
+.ci.fail{background:var(--red-l);border-color:#F0A0A0}
+.ci.block{background:#F5F0FF;border-color:#C4B5FD}
+.ci.skip{opacity:.5}
+.ci-ico{font-size:16px;flex-shrink:0;margin-top:1px}
+.ci.ok .ci-ico{color:var(--green)}
+.ci.warn .ci-ico{color:var(--amber)}
+.ci.fail .ci-ico{color:var(--red)}
+.ci.block .ci-ico{color:var(--purple)}
+.ci.skip .ci-ico{color:var(--g4)}
+.ci-lbl{font-size:13px;font-weight:600;color:var(--g7);line-height:1.4;display:flex;align-items:center;flex-wrap:wrap;gap:5px}
+.ci-note{font-size:12px;color:var(--g5);margin-top:3px;line-height:1.55}
+.tag{display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px}
+.tag.req{background:#FDECEA;color:#A93226}
+.tag.caut{background:var(--amber-l);color:var(--amber);border:1px solid var(--amber-b)}
+.tag.chk{background:var(--blue-l);color:var(--blue)}
+.tag.block{background:#F5F0FF;color:var(--purple)}
+
+/* Action box */
+.abox{background:var(--g1);border-radius:10px;border:1.5px solid var(--g3);padding:14px 16px;margin-top:4px}
+.abox-ttl{font-size:13px;font-weight:700;color:var(--g7);margin-bottom:9px;display:flex;align-items:center;gap:5px}
+.abox-ttl i{color:var(--blue);font-size:15px}
+.alist{list-style:none}
+.alist li{font-size:12px;color:var(--g5);padding:5px 0;border-bottom:1px solid var(--g3);display:flex;align-items:flex-start;gap:7px;line-height:1.55}
+.alist li:last-child{border:none}
+.alist li::before{content:"→";color:var(--blue);flex-shrink:0}
+.res-foot{text-align:center;font-size:11px;color:var(--g4);margin-top:14px}
+
+@media(max-width:520px){.upload-grid,.ctx{grid-template-columns:1fr}.hdr{flex-direction:column;text-align:center}}
+</style>
+</head>
+<body>
+<div class="page">
+
+<div class="hdr">
+  <div class="hdr-ico"><i class="ti ti-shield-check"></i></div>
+  <div>
+    <h1>소셜 콘텐츠 자동 검수 시스템 <span style="font-size:11px;opacity:.7">v2.0</span></h1>
+    <p>이미지·영상·캡션을 업로드하면 AI가 가이드라인 기준으로 리스크를 분석합니다</p>
+    <div class="badges">
+      <span class="badge"><i class="ti ti-sparkles" style="font-size:11px"></i> 완전 무료</span>
+      <span class="badge"><i class="ti ti-calendar-exclamation" style="font-size:11px"></i> 날짜 DB 탑재</span>
+      <span class="badge"><i class="ti ti-alert-triangle" style="font-size:11px"></i> 키워드 조합 감지</span>
+      <span class="badge"><i class="ti ti-layers" style="font-size:11px"></i> 5단계 등급</span>
+    </div>
+  </div>
+</div>
+
+<div class="info-banner">
+  <i class="ti ti-info-circle"></i>
+  <p><strong>API 키 없이 무료로 사용 가능합니다.</strong><br>
+  처음 실행 시 <a href="https://puter.com" target="_blank" style="color:var(--blue);font-weight:700">puter.com</a>에서 Google 계정으로 먼저 가입·로그인 후 이용해 주세요.</p>
+</div>
+
+<div class="card">
+  <div class="card-ttl"><i class="ti ti-upload"></i> 콘텐츠 업로드</div>
+
+  <div class="upload-grid">
+    <div class="ubox" id="img-box" onclick="document.getElementById('img-in').click()">
+      <i class="ti ti-photo ui"></i>
+      <div class="ul">이미지 업로드</div>
+      <div class="us">JPG, PNG, GIF, WEBP</div>
+      <div class="pg" id="img-prev" onclick="event.stopPropagation()"></div>
+    </div>
+    <div class="ubox" id="vid-box" onclick="document.getElementById('vid-in').click()">
+      <i class="ti ti-video ui"></i>
+      <div class="ul">영상 업로드</div>
+      <div class="us">MP4, MOV, AVI (썸네일 분석)</div>
+      <div class="pg" id="vid-prev" onclick="event.stopPropagation()"></div>
+    </div>
+  </div>
+  <input type="file" id="img-in" accept="image/*" multiple>
+  <input type="file" id="vid-in" accept="video/*" multiple>
+
+  <label class="fl" for="caption">캡션 / 본문 텍스트</label>
+  <textarea id="caption" placeholder="게시할 캡션, 해시태그, 이벤트 문구, 이벤트 코드명 등을 입력하세요..." oninput="onTextInput()"></textarea>
+
+  <!-- 실시간 경고 박스들 -->
+  <div class="pre-alert date-type" id="alert-date">
+    <div class="pre-alert-ttl"><i class="ti ti-calendar-exclamation"></i> 📅 날짜 리스크 감지</div>
+    <div class="pre-alert-body" id="alert-date-body"></div>
+  </div>
+  <div class="pre-alert keyword-type" id="alert-keyword">
+    <div class="pre-alert-ttl"><i class="ti ti-alert-triangle"></i> ⚠️ 위험 키워드 감지</div>
+    <div class="pre-alert-body" id="alert-keyword-body"></div>
+  </div>
+  <div class="pre-alert combo-type" id="alert-combo">
+    <div class="pre-alert-ttl"><i class="ti ti-link"></i> 🔗 조합 리스크 감지</div>
+    <div class="pre-alert-body" id="alert-combo-body"></div>
+  </div>
+
+  <div class="ctx">
+    <div>
+      <label class="fl" for="channel">발행 채널</label>
+      <select id="channel">
+        <option value="instagram">인스타그램</option>
+        <option value="youtube">유튜브</option>
+        <option value="tiktok">틱톡</option>
+        <option value="blog">블로그</option>
+        <option value="facebook">페이스북</option>
+        <option value="twitter">X(트위터)</option>
+          <option value="threads">스레드(Threads)</option>
+      </select>
+    </div>
+    <div>
+      <label class="fl" for="pubdate">발행 예정일 <span style="color:#C0392B;font-weight:700">*필수</span></label>
+      <input type="date" id="pubdate" onchange="onDateChange()" required style="border-color:var(--amber-b)">
+    </div>
+  </div>
+
+  <!-- 발행일 경고 -->
+  <div class="pre-alert date-type" id="alert-pubdate" style="margin-top:-8px;margin-bottom:14px">
+    <div class="pre-alert-ttl"><i class="ti ti-calendar-exclamation"></i> 📅 발행 예정일 리스크</div>
+    <div class="pre-alert-body" id="alert-pubdate-body"></div>
+  </div>
+
+  <button class="btn-run" id="run-btn" onclick="runAnalysis()" disabled>
+    <i class="ti ti-robot"></i> AI 검수 시작
+  </button>
+  <p class="btn-hint" id="run-hint" style="color:#C0392B">발행 예정일을 먼저 선택해주세요</p>
+</div>
+
+<div id="result"></div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════════
+// 1. 민감 날짜 DB  (D-7 ~ D+3 기간 경고)
+// ══════════════════════════════════════════════════════════════
+const SENSITIVE_DATES = [
+  {month:1, day:17, level:3, name:"1·17 대구 지하철 화재",       desc:"2003년 대구 지하철 중앙로역 화재 참사 (192명 사망)"},
+  {month:3, day:1,  level:3, name:"3·1절 독립운동 기념일",        desc:"민족·독립운동 소재 — 정치·이념 연상 표현 주의"},
+  {month:3, day:26, level:3, name:"천안함 피격일",                 desc:"2010년 천안함 폭침 (승조원 46명 전사)"},
+  {month:4, day:3,  level:4, name:"4·3 제주 4·3 사건",           desc:"제주 4·3 사건 기념일 — 관련 표현·소재 극도 주의"},
+  {month:4, day:16, level:4, name:"4·16 세월호 참사",             desc:"2014년 세월호 침몰 (사망·실종 304명) — 유희성 콘텐츠 전면 금지"},
+  {month:4, day:19, level:3, name:"4·19 혁명 기념일",             desc:"1960년 4·19 혁명 — 정치·이념 연상 소재 주의"},
+  {month:5, day:5,  level:2, name:"어린이날",                      desc:"어린이 대상 마케팅 시 과장 광고·과소비 조장 금지"},
+  {month:5, day:18, level:4, name:"5·18 광주민주화운동",          desc:"1980년 5월 18~28일 광주민주화운동 — 탱크·계엄·광주 등 관련 표현 결합 엄격 금지"},
+  {month:6, day:6,  level:3, name:"현충일",                        desc:"호국영령 추모일 — 유희성·홍보성 이벤트 자제"},
+  {month:6, day:10, level:3, name:"6·10 민주항쟁",                desc:"1987년 6·10 민주항쟁 — 정치 연상 소재 주의"},
+  {month:6, day:25, level:4, name:"6·25 한국전쟁",                desc:"한국전쟁 발발일 — 전쟁·분단 소재 유희화 금지"},
+  {month:8, day:15, level:3, name:"광복절",                        desc:"과도한 민족주의 표현, 일본 관련 자극 콘텐츠 주의"},
+  {month:10,day:9,  level:2, name:"한글날",                        desc:"언어·표현 민감도 상승 시기"},
+  {month:10,day:29, level:4, name:"10·29 이태원 참사",            desc:"2022년 이태원 핼러윈 압사 참사 (159명 사망) — 유희성 콘텐츠 전면 금지"},
+  {month:11,day:11, level:1, name:"빼빼로데이",                    desc:"상업적 기념일 — 과소비 조장, 따돌림 연상 소재 주의"},
+  {month:12,day:3,  level:4, name:"12·3 비상계엄 선포",           desc:"2024년 비상계엄 선포 사건 — 정치·이념 연상 소재 극도 주의"},
+  {month:12,day:29, level:4, name:"12·29 무안공항 참사",          desc:"2024년 제주항공 여객기 무안공항 활주로 이탈 사고 (179명 사망) — 항공·여행 경쾌한 표현 주의"},
+];
+const ALERT_BEFORE=7, ALERT_AFTER=3;
+
+// ══════════════════════════════════════════════════════════════
+// 2. 위험 키워드 DB
+// ══════════════════════════════════════════════════════════════
+const KEYWORD_DB = [
+  // ── 세월호 ──────────────────────────────────────────
+  {words:["세월호","416","4.16","4·16","4/16","노란 리본","노란리본","침몰","가라앉","잠수함","구명조끼","수학여행","단원고","팽목항","미수습","세월"], cat:"세월호 참사", level:4},
+  // ── 이태원 ──────────────────────────────────────────
+  {words:["이태원","1029","10.29","10·29","10/29","압사","핼러윈 참사","골목 사고","CPR 사건","인파 사고","이태원 골목"], cat:"이태원 참사", level:4},
+  // ── 5·18 ────────────────────────────────────────────
+  {words:["518","5.18","5·18","5/18","광주 민주","계엄군","탱크데이","탱크 할인","탱크 이벤트","공수부대","폭도","금남로","계엄 해제","5월 18일","오월 광주"], cat:"5·18 광주민주화운동", level:4},
+  // ── 탱크 단독 (날짜 없어도 위험) ────────────────────
+  {words:["탱크"], cat:"탱크 — 5·18·6·25 참사 연상 (단독 사용도 위험)", level:3},
+  // ── 6·25 ────────────────────────────────────────────
+  {words:["625","6.25","6·25","6/25","북침","남침","빨갱이","인민군","포격 이벤트","전쟁 할인","6월 25일"], cat:"6·25 한국전쟁", level:4},
+  // ── 무안공항 ─────────────────────────────────────────
+  {words:["무안공항","제주항공 사고","제주항공 참사","2216","동체착륙","조류충돌","콘크리트 둔덕","활주로 이탈","항공 참사","1229","12.29","12·29","12/29","무안 참사"], cat:"무안공항 참사", level:4},
+  // ── 12·3 계엄 ────────────────────────────────────────
+  {words:["비상계엄","계엄 선포","계엄령","12·3","12/3","123계엄","윤석열 계엄","내란"], cat:"12·3 비상계엄", level:4},
+  // ── 박종철·6월항쟁 ──────────────────────────────────
+  {words:["탁 치니 억","책상을 탁","억하고","남영동","고문 치사","박종철","물고문","탁 쳤더니"], cat:"박종철 사건 연상", level:4},
+  // ── 노무현 관련 밈 ──────────────────────────────────
+  {words:["노무","노무노무","운지","노알라","부엉이바위","봉하마을 조롱"], cat:"고인(노무현) 조롱 밈 — 단독 사용도 위험", level:4},
+  // ── 일베·극우 은어 ──────────────────────────────────
+  {words:["일베","ㅇㅂ","민주화시키다","홍어","전라디언","좌좀","빨갱이","종북","토착왜구","수구꼴통","보수꼴통"], cat:"극우·혐오 은어", level:4},
+  // ── 지역 혐오 ────────────────────────────────────────
+  {words:["홍어","전라디","라도","경상도 욕","전라도 욕","지역 멸칭"], cat:"지역 혐오", level:4},
+  // ── 젠더 혐오 ────────────────────────────────────────
+  {words:["한남","한녀","김치녀","된장녀","맘충","애비충","퐁퐁남","설거지론","집게손 논란","한남충","여혐","남혐"], cat:"젠더 혐오 표현", level:3},
+  // ── 성별 비하 ────────────────────────────────────────
+  {words:["년","놈","보지","자지","창녀","창놈"], cat:"성별 비하 표현", level:4},
+  // ── 연령 혐오 ────────────────────────────────────────
+  {words:["틀딱","잼민이","급식충","꼰대질","노인충"], cat:"연령 혐오 표현", level:3},
+  // ── 장애 비하 ────────────────────────────────────────
+  {words:["병신","장애냐","자폐냐","정신병자","미친놈","미친년","정신 나간"], cat:"장애 비하 표현", level:4},
+  // ── 외모 비하 ────────────────────────────────────────
+  {words:["돼지같","멸치같","빻았","못생긴 거","뚱뚱 조롱","찐따"], cat:"외모 비하 표현", level:3},
+  // ── 인종·국적 비하 ──────────────────────────────────
+  {words:["짱깨","쪽바리","깜둥이","조선족 비하","왜놈","짱골라"], cat:"인종·국적 비하 표현", level:4},
+  // ── 직업·계층 비하 ──────────────────────────────────
+  {words:["배달충","알바충","흙수저 조롱","을충","거지 같은"], cat:"계층 비하 표현", level:3},
+  // ── 참사 연상 동사 (단독도 주의) ─────────────────────
+  {words:["폭발적","터졌다","싹쓸이","진압","침투","상륙","탈출","구출","가라앉","말라죽","압도적 할인"], cat:"참사·전쟁 연상 동사 (날짜 결합 시 위험)", level:1},
+  // ── 초성 은어 ────────────────────────────────────────
+  {words:["ㅇㅂ","ㅎㅇ","ㅁㅈㅎ","ㄷㄷ","ㅂㅅ"], cat:"초성 은어 의심", level:2},
+  // ── 민감 숫자 할인율 ─────────────────────────────────
+  {words:["416%","518%","625%","1029%","1229%","416원","518원","625원","1029원","1229원"], cat:"민감 날짜 숫자 할인율·금액", level:4},
+  // ── 딥페이크·AI 민감 용어 ───────────────────────────
+  {words:["딥페이크","deepfake","가짜 얼굴","합성 영상","허위 영상"], cat:"딥페이크 연상 표현 — 범죄 이미지 강함", level:2},
+];
+
+];
+
+// ══════════════════════════════════════════════════════════════
+// 3. 조합 리스크 룰
+// ══════════════════════════════════════════════════════════════
+const COMBO_RULES = [
+  {a:["518","5.18","5·18","광주"], b:["탱크","계엄","공수","진압","폭도"], desc:"5·18 + 군사 표현 조합 — 탱크데이 류 논란 직접 연상"},
+  {a:["625","6.25","한국전쟁"], b:["침투","진압","포격","싹쓸이"], desc:"6·25 + 공격적 동사 조합"},
+  {a:["416","세월호","4.16"], b:["가라앉","침몰","빠지","잠수","물속"], desc:"세월호 + 침몰 표현 조합"},
+  {a:["1029","이태원","10.29"], b:["압사","핼러윈","골목","CPR","인파"], desc:"이태원 참사 + 관련 표현 조합"},
+  {a:["1229","무안","제주항공","12.29"], b:["추락","활주로","착륙","항공","비행"], desc:"무안공항 참사 + 항공 표현 조합"},
+  {a:["집게손","핀치","소시지","핫도그"], b:["작다","작아도","작지만","손가락"], desc:"집게손 + 소시지형 오브젝트/크기 카피 조합 — GS25 류 젠더 논란"},
+  {a:["탁 치니","책상을 탁","억하고"], b:["효능","효과","딱","즉시","바로"], desc:"박종철 사건 연상 문구 + 제품 효능 표현 조합"},
+];
+
+// ══════════════════════════════════════════════════════════════
+// 4. 날짜 감지 함수
+// ══════════════════════════════════════════════════════════════
+function extractDates(text){
+  const found=[];
+  const pats=[
+    {re:/(\d{1,2})월\s*(\d{1,2})일/g, m:1, d:2},
+    {re:/(\d{1,2})\/(\d{1,2})/g, m:1, d:2},
+    {re:/(\d{1,2})\.(\d{1,2})/g, m:1, d:2},
+    {re:/·(\d{1,2})·(\d{1,2})/g, m:1, d:2},
+    // 붙여쓰기: 416, 518, 625, 1029, 1229 등
+    {re:/\b(1[012]|[1-9])(0[1-9]|[12]\d|3[01])\b/g, m:1, d:2},
+  ];
+  pats.forEach(p=>{
+    let match; const re=new RegExp(p.re.source,'g');
+    while((match=re.exec(text))!==null){
+      const mo=parseInt(match[p.m]), da=parseInt(match[p.d]);
+      if(mo>=1&&mo<=12&&da>=1&&da<=31) found.push({month:mo,day:da,raw:match[0]});
+    }
+  });
+  return found;
+}
+
+function getDateAlerts(month, day){
+  return SENSITIVE_DATES.filter(sd=>{
+    if(sd.month!==month) return false;
+    const diff=day-sd.day;
+    return diff>=-ALERT_AFTER && diff<=ALERT_BEFORE;
+  });
+}
+
+// ══════════════════════════════════════════════════════════════
+// 5. 키워드 감지
+// ══════════════════════════════════════════════════════════════
+function detectKeywords(text){
+  const hits=[];
+  // 변형 탐지를 위해 정규화된 텍스트도 준비
+  const normalized=text
+    .replace(/\s+/g,'')           // 공백 제거
+    .replace(/[.·\-_/]/g,'')     // 구분자 제거
+    .toLowerCase();
+
+  KEYWORD_DB.forEach(rule=>{
+    rule.words.forEach(w=>{
+      const wn=w.replace(/\s+/g,'').replace(/[.·\-_/]/g,'').toLowerCase();
+      // 원문 또는 정규화 텍스트에서 감지
+      if(text.includes(w)||text.toLowerCase().includes(w.toLowerCase())||normalized.includes(wn)){
+        // 이미 같은 카테고리로 추가됐으면 스킵
+        if(!hits.find(h=>h.word===w))
+          hits.push({word:w, cat:rule.cat, level:rule.level});
+      }
+    });
+  });
+  return hits;
+}
+
+// 단일 고위험 단어 즉시 감지 (별도 레이어 — 형태소 무관 매칭)
+const INSTANT_BLOCK_WORDS=[
+  {w:"탱크",   cat:"탱크 — 5·18/6·25 참사 직접 연상", level:3},
+  {w:"노무",   cat:"고인(노무현) 조롱 밈 연상 (노무노무·운지 등)", level:3},
+  {w:"운지",   cat:"고인(노무현) 조롱 밈", level:4},
+  {w:"홍어",   cat:"지역 혐오 표현", level:4},
+  {w:"틀딱",   cat:"노인 혐오 표현", level:3},
+  {w:"맘충",   cat:"젠더·부모 비하 표현", level:3},
+  {w:"한남",   cat:"젠더 혐오 표현", level:3},
+  {w:"한녀",   cat:"젠더 혐오 표현", level:3},
+  {w:"병신",   cat:"장애 비하 표현", level:4},
+  {w:"빨갱이", cat:"정치 혐오 표현", level:4},
+  {w:"짱깨",   cat:"인종 비하 표현", level:4},
+  {w:"쪽바리", cat:"인종 비하 표현", level:4},
+  {w:"ㅇㅂ",   cat:"일베 초성 은어", level:4},
+  {w:"폭도",   cat:"5·18 관련 혐오 프레임 표현", level:4},
+  {w:"침몰",   cat:"세월호 참사 연상 표현", level:3},
+  {w:"압사",   cat:"이태원 참사 연상 표현", level:3},
+  {w:"계엄",   cat:"12·3 비상계엄 연상 표현", level:3},
+  {w:"좌좀",   cat:"정치 진영 혐오 표현", level:3},
+];
+function detectInstantBlocks(text){
+  return INSTANT_BLOCK_WORDS.filter(r=>text.includes(r.w)).map(r=>({word:r.w,cat:r.cat,level:r.level}));
+}
+
+// 텍스트 다방향 읽기 위험 조합 감지
+// 이벤트명·해시태그·슬로건 등의 첫 글자 조합 분석
+function detectHiddenReading(text){
+  const results=[];
+  // 1) 단어 첫 글자 모음 (공백 기준)
+  const words=text.split(/\s+/).filter(w=>w.length>0);
+  if(words.length>=2){
+    const firstChars=words.map(w=>w[0]).join('');
+    // 위험 초성/첫글자 조합 체크
+    const dangerCombos=[
+      {combo:'ㅇㅂ', desc:'일베 초성 은어'},
+      {combo:'ㅂㅅ', desc:'욕설 초성'},
+      {combo:'ㅅㅂ', desc:'욕설 초성'},
+      {combo:'ㄷㅊ', desc:'욕설 초성'},
+      {combo:'ㅈㄴ', desc:'욕설 초성'},
+    ];
+    dangerCombos.forEach(dc=>{
+      if(firstChars.includes(dc.combo))
+        results.push({type:'첫글자 조합', found:firstChars, desc:`단어 첫 글자 조합 "${firstChars}" 내 "${dc.combo}" 감지 → ${dc.desc}`});
+    });
+  }
+  // 2) 해시태그·이벤트명 분석 (# 뒤 단어)
+  const hashtags=text.match(/#[\w가-힣]+/g)||[];
+  hashtags.forEach(tag=>{
+    const chars=[...tag.slice(1)]; // # 제거
+    // 세로 읽기 = 각 글자 나열
+    const vertical=chars.join('');
+    // 단순 위험 단어 포함 여부
+    const dangerWords=['병','신','새','끼','씨','발','지','랄','놈','년'];
+    dangerWords.forEach(dw=>{
+      if(vertical.includes(dw))
+        results.push({type:'해시태그 숨은 글자', found:tag, desc:`해시태그 "${tag}" 내 "${dw}" 감지 — 조합 의미 확인 필요`});
+    });
+  });
+  return results;
+}
+
+// ══════════════════════════════════════════════════════════════
+// 6. 조합 리스크 감지
+// ══════════════════════════════════════════════════════════════
+function detectCombos(text){
+  const hits=[];
+  COMBO_RULES.forEach(rule=>{
+    const hasA=rule.a.some(w=>text.includes(w));
+    const hasB=rule.b.some(w=>text.includes(w));
+    if(hasA&&hasB){
+      const foundA=rule.a.filter(w=>text.includes(w));
+      const foundB=rule.b.filter(w=>text.includes(w));
+      hits.push({desc:rule.desc, foundA, foundB});
+    }
+  });
+  return hits;
+}
+
+// ══════════════════════════════════════════════════════════════
+// 7. 실시간 경고 렌더링
+// ══════════════════════════════════════════════════════════════
+function onTextInput(){
+  const text=document.getElementById('caption').value;
+  runRuleChecks(text);
+  updateBtn();
+}
+
+function onDateChange(){
+  checkPubDate();
+  updateBtn();
+}
+
+let lastRuleAlerts={dateAlerts:[],keywordHits:[],comboHits:[]};
+
+function runRuleChecks(text){
+  // 날짜
+  const dates=extractDates(text);
+  const dateAlerts=[];
+  dates.forEach(d=>{
+    getDateAlerts(d.month,d.day).forEach(sd=>{
+      if(!dateAlerts.find(x=>x.name===sd.name))
+        dateAlerts.push({raw:d.raw, ...sd});
+    });
+  });
+  // 키워드 (일반 + 즉시차단)
+  const kwBase=detectKeywords(text);
+  const kwInstant=detectInstantBlocks(text);
+  // 중복 제거 후 합산
+  const keywordHits=[...kwBase];
+  kwInstant.forEach(ib=>{if(!keywordHits.find(h=>h.word===ib.word))keywordHits.push(ib);});
+  // 조합
+  const comboHits=detectCombos(text);
+
+  // 다방향 읽기 감지
+  const hiddenReadings=detectHiddenReading(text);
+
+  lastRuleAlerts={dateAlerts,keywordHits,comboHits,hiddenReadings};
+
+  // 날짜 경고
+  const dateBox=document.getElementById('alert-date');
+  const dateBody=document.getElementById('alert-date-body');
+  if(dateAlerts.length>0){
+    dateBox.style.display='block';
+    dateBody.innerHTML=dateAlerts.map(a=>
+      `텍스트 내 <strong>"${a.raw}"</strong> 감지 → <strong>${a.name}</strong> (검수 강도: Level ${a.level})<br>${a.desc}`
+    ).join('<br><br>');
+  }else{dateBox.style.display='none';}
+
+  // 키워드 경고 (level 2 이상만 표시)
+  const kwHigh=keywordHits.filter(h=>h.level>=2);
+  const kwBox=document.getElementById('alert-keyword');
+  const kwBody=document.getElementById('alert-keyword-body');
+  if(kwHigh.length>0){
+    kwBox.style.display='block';
+    const grouped={};
+    kwHigh.forEach(h=>{
+      if(!grouped[h.cat]) grouped[h.cat]=[];
+      grouped[h.cat].push(h.word);
+    });
+    kwBody.innerHTML=Object.entries(grouped).map(([cat,words])=>
+      `<strong>[${cat}]</strong> 감지 표현: ${words.map(w=>`"${w}"`).join(', ')}`
+    ).join('<br>');
+  }else{kwBox.style.display='none';}
+
+  // 조합 경고
+  const comboBox=document.getElementById('alert-combo');
+  const comboBody=document.getElementById('alert-combo-body');
+  const comboItems=[];
+  if(comboHits.length>0){
+    comboHits.forEach(h=>comboItems.push(`<strong>${h.desc}</strong><br>감지된 조합: ${h.foundA.map(w=>`"${w}"`).join('+')} × ${h.foundB.map(w=>`"${w}"`).join('+')}`));
+  }
+  if(hiddenReadings&&hiddenReadings.length>0){
+    hiddenReadings.forEach(h=>comboItems.push(`<strong>🔠 다방향 읽기 리스크 [${h.type}]</strong><br>${h.desc}`));
+  }
+  if(comboItems.length>0){
+    comboBox.style.display='block';
+    comboBody.innerHTML=comboItems.join('<br><br>');
+  }else{comboBox.style.display='none';}
+}
+
+let lastPubDateAlerts=[];
+function checkPubDate(){
+  const val=document.getElementById('pubdate').value;
+  const box=document.getElementById('alert-pubdate');
+  const body=document.getElementById('alert-pubdate-body');
+  if(!val){box.style.display='none';lastPubDateAlerts=[];return;}
+  const d=new Date(val);
+  const month=d.getMonth()+1, day=d.getDate();
+  const alerts=getDateAlerts(month,day);
+  lastPubDateAlerts=alerts;
+  if(alerts.length>0){
+    box.style.display='block';
+    body.innerHTML=alerts.map(a=>
+      `발행 예정일 <strong>${month}월 ${day}일</strong>은 <strong>${a.name}</strong> 전후입니다 (Level ${a.level})<br>${a.desc}`
+    ).join('<br><br>');
+  }else{box.style.display='none';}
+}
+
+// ══════════════════════════════════════════════════════════════
+// 8. 파일 업로드
+// ══════════════════════════════════════════════════════════════
+const imgFiles=[],vidFiles=[];
+function updateBtn(){
+  const hasContent=imgFiles.length>0||vidFiles.length>0||document.getElementById('caption').value.trim().length>0;
+  const hasDate=!!document.getElementById('pubdate').value;
+  const ok=hasContent&&hasDate;
+  document.getElementById('run-btn').disabled=!ok;
+  const hint=document.getElementById('run-hint');
+  if(!hasDate) hint.textContent='발행 예정일을 먼저 선택해주세요';
+  else if(!hasContent) hint.textContent='이미지 또는 텍스트 중 하나 이상 입력하세요';
+  else hint.textContent='';
+  // 날짜 입력란 테두리 색 강조
+  const dateInput=document.getElementById('pubdate');
+  dateInput.style.borderColor=hasDate?'var(--green-b)':'var(--red)';
+}
+
+document.getElementById('img-in').addEventListener('change',function(e){
+  Array.from(e.target.files).forEach(f=>{
+    if(imgFiles.find(x=>x.name===f.name))return;
+    imgFiles.push(f);
+    document.getElementById('img-box').classList.add('on');
+    const d=document.createElement('div');d.className='pi';
+    d.innerHTML=`<img src="${URL.createObjectURL(f)}" alt="${f.name}"><button class="rb" onclick="rmF('img','${f.name}',this.parentNode)">×</button>`;
+    document.getElementById('img-prev').appendChild(d);
+  });
+  updateBtn();
+});
+document.getElementById('vid-in').addEventListener('change',function(e){
+  Array.from(e.target.files).forEach(f=>{
+    if(vidFiles.find(x=>x.name===f.name))return;
+    vidFiles.push(f);
+    document.getElementById('vid-box').classList.add('on');
+    const d=document.createElement('div');d.className='pi';
+    d.innerHTML=`<div class="vt"><i class="ti ti-movie"></i></div><button class="rb" onclick="rmF('vid','${f.name}',this.parentNode)">×</button>`;
+    document.getElementById('vid-prev').appendChild(d);
+  });
+  updateBtn();
+});
+function rmF(type,name,node){
+  const arr=type==='img'?imgFiles:vidFiles;
+  const i=arr.findIndex(x=>x.name===name);
+  if(i>-1)arr.splice(i,1);
+  node.remove();
+  if(type==='img'&&!imgFiles.length)document.getElementById('img-box').classList.remove('on');
+  if(type==='vid'&&!vidFiles.length)document.getElementById('vid-box').classList.remove('on');
+  updateBtn();
+}
+async function toB64(file){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result.split(',')[1]);r.onerror=rej;r.readAsDataURL(file);})}
+async function vidThumb(file){return new Promise(res=>{const v=document.createElement('video');v.src=URL.createObjectURL(file);v.addEventListener('loadeddata',()=>{v.currentTime=1;});v.addEventListener('seeked',()=>{const c=document.createElement('canvas');c.width=320;c.height=180;c.getContext('2d').drawImage(v,0,0,320,180);res(c.toDataURL('image/jpeg'));});v.addEventListener('error',()=>res(null));});}
+
+// ══════════════════════════════════════════════════════════════
+// 9. AI 분석 실행
+// ══════════════════════════════════════════════════════════════
+async function runAnalysis(){
+  const caption=document.getElementById('caption').value.trim();
+  const channel=document.getElementById('channel').value;
+  const pubDate=document.getElementById('pubdate').value;
+  const chNames={instagram:'인스타그램',youtube:'유튜브',tiktok:'틱톡',blog:'블로그',facebook:'페이스북',twitter:'X(트위터)',threads:'스레드(Threads)'};
+
+  const {dateAlerts,keywordHits,comboHits}=lastRuleAlerts;
+
+  // 규칙 기반 감지 결과를 AI 프롬프트에 주입
+  let ruleReport='';
+  if(dateAlerts.length>0){
+    ruleReport+='\n\n【규칙 엔진: 텍스트 내 민감 날짜 감지 — 반드시 결과에 포함】\n';
+    dateAlerts.forEach(a=>{ruleReport+=`- "${a.raw}" → ${a.name} (${a.desc})\n`;});
+  }
+  if(lastPubDateAlerts.length>0){
+    const d=new Date(pubDate);
+    ruleReport+='\n\n【규칙 엔진: 발행 예정일 민감 날짜 충돌】\n';
+    lastPubDateAlerts.forEach(a=>{ruleReport+=`- 발행일 ${d.getMonth()+1}월 ${d.getDate()}일 = ${a.name} 전후 (${a.desc})\n`;});
+  }
+  if(keywordHits.filter(h=>h.level>=2).length>0){
+    ruleReport+='\n\n【규칙 엔진: 위험 키워드 감지 — 반드시 결과에 포함】\n';
+    keywordHits.filter(h=>h.level>=2).forEach(h=>{ruleReport+=`- "${h.word}" → ${h.cat} (Level ${h.level})\n`;});
+  }
+  if(comboHits.length>0){
+    ruleReport+='\n\n【규칙 엔진: 조합 리스크 감지 — 반드시 결과에 포함】\n';
+    comboHits.forEach(h=>{ruleReport+=`- ${h.desc} (감지: ${[...h.foundA,...h.foundB].join(', ')})\n`;});
+  }
+  const {hiddenReadings=[]}=lastRuleAlerts;
+  if(hiddenReadings.length>0){
+    ruleReport+='\n\n【규칙 엔진: 다방향 읽기 리스크 감지 — 반드시 결과에 포함】\n';
+    hiddenReadings.forEach(h=>{ruleReport+=`- [${h.type}] ${h.desc}\n`;});
+  }
+
+  document.getElementById('result').innerHTML=`<div class="card"><div class="loading"><div class="spinner"></div><p>AI가 콘텐츠를 분석하고 있습니다</p><div class="lstep" id="lstep">텍스트 전체 정밀 분석 중...</div></div></div>`;
+  const steps=['키워드·날짜·조합 리스크 대조 중...','이미지 비주얼 요소 분석 중...','숨은 맥락·초성 조합 점검 중...','최종 등급 판정 생성 중...'];
+  let si=0;
+  const iv=setInterval(()=>{const el=document.getElementById('lstep');if(el&&si<steps.length)el.textContent=steps[si++];},1400);
+
+  try{
+    let imageDesc='';
+    if(imgFiles.length>0||vidFiles.length>0){
+      const imgAnalyses=[];
+      const allMedia=[
+        ...imgFiles.map(f=>({file:f,type:'image'})),
+        ...vidFiles.map(f=>({file:f,type:'video'}))
+      ];
+
+      for(const media of allMedia.slice(0,4)){
+        try{
+          // 이미지/영상 → base64 data URL 변환
+          let dataUrl;
+          if(media.type==='image'){
+            const b=await toB64(media.file);
+            dataUrl=`data:${media.file.type||'image/jpeg'};base64,${b}`;
+          } else {
+            const t=await vidThumb(media.file);
+            if(!t) continue;
+            dataUrl=t; // 이미 data:image/jpeg;base64,... 형태
+          }
+
+          // ✅ Puter 공식 문서 기준 정확한 호출 형식:
+          // puter.ai.chat(텍스트프롬프트, 이미지URL, {model})
+          const visionPrompt=`이 이미지를 한국 기업 소셜 미디어 리스크 관점에서 분석하세요.
+아래 항목을 확인하고 발견된 것만 구체적으로 서술하세요 (없으면 생략):
+1. 손 모양: 집게손(엄지+검지 집기), 손가락 개수(1~5개), V사인, OK사인, 특이 제스처
+2. 위험 조합: 손+소시지/핫도그/바나나/빨대/스틱형 오브젝트 동시 존재 여부
+3. 군사·참사 이미지: 탱크, 총기, 헬멧, 군복, 배, 구명조끼, 항공기, 화재, 활주로
+4. 추모 상징: 노란 리본, 검은 리본, 추모 촛불, 국화
+5. 숫자: 의상·소품·배경·자막에 보이는 모든 숫자 (특히 416, 518, 625, 1029, 1229)
+6. 색상: 빨강/파랑/노랑 단색이 화면 절반 이상 차지하는지
+7. 이미지 내 텍스트: 보이는 모든 글자
+8. 텍스트 다방향 읽기: 가로/세로/대각선으로 읽었을 때 숨은 의미·비하어·혐오어·민감 조합이 생기는지
+200자 이내로 서술. 문제 없으면 "이상 없음".`;
+
+          const vr = await puter.ai.chat(
+            visionPrompt,
+            dataUrl,
+            { model: 'gpt-4o' }
+          );
+
+          // 응답 파싱 — Puter는 응답을 문자열 또는 객체로 반환
+          const desc = typeof vr === 'string' ? vr
+            : vr?.message?.content
+            || vr?.content
+            || vr?.text
+            || String(vr);
+
+          if(desc && !desc.includes('이상 없음') && desc.trim().length > 3){
+            imgAnalyses.push(`[${media.file.name}] ${desc.trim()}`);
+          }
+        } catch(ve){
+          imgAnalyses.push(`[${media.file.name}] 분석 오류: ${ve.message}`);
+        }
+      }
+      imageDesc = imgAnalyses.length > 0
+        ? imgAnalyses.join('\n\n')
+        : '첨부 파일 분석 완료 — 시각적 리스크 특이사항 없음';
+    }
+
+    const prompt=`당신은 한국 기업 소셜 미디어 콘텐츠 리스크 전문 검수 AI입니다.
+아래 정보를 분석하고 JSON만 반환하세요. 마크다운 코드블록 절대 금지.
+
+【핵심 지침】
+- 캡션 텍스트 처음부터 끝까지 빠짐없이 읽을 것
+- 날짜를 숫자형(518,416,1029,1229), 한글형(5월 18일), 슬래시형(5/18), 점형(5.18) 모두 탐지
+- 규칙 엔진이 감지한 항목은 반드시 결과에 포함하고 구체적 설명 추가
+- 문제 발견 시 "텍스트 어디서(앞/중간/끝), 이미지 어느 부분"을 note에 명시
+- 날짜 리스크는 "X월 X일 = 무슨 사건"을 정확히 명시
+- 조합 리스크는 어떤 단어가 어떤 단어와 결합해서 문제인지 설명
+- 등급(level) 판정: 0=문제없음, 1=일반확인, 2=팀장검수, 3=자동보류, 4=게시불가
+${ruleReport}
+
+【채널】${chNames[channel]}
+【발행 예정일】${pubDate||'미입력'}
+【캡션 전문】
+${caption||'(없음)'}
+${imageDesc?`【이미지/영상 분석 결과】\n${imageDesc}`:''}
+
+【검수 항목】
+A. 역사·참사·날짜 리스크 (세월호4/16, 이태원10/29, 5·18, 6·25, 무안12/29, 12·3계엄, 4·3, 천안함3/26, 현충일6/6 등)
+B. 커뮤니티 은어·극우 표현 (일베은어, 초성은어, 지역혐오, 고인조롱 밈)
+C. 젠더 갈등·이미지 리스크 (집게손, 소시지형오브젝트, 크기비교카피, GS25류조합)
+D. 혐오·차별 표현 (성별·연령·장애·외모·지역·인종·직업 비하)
+E. 정치·이념·사회갈등 (정당·정치인·선거·탄핵·진영갈등)
+F. 숫자·할인율·이벤트코드 리스크 (416,518,625,1029,1229 등 민감숫자)
+G. 이미지·디자인 리스크 (손모양, 군사이미지, 참사이미지, 추모상징, 폰트숨은글자)
+H. 조합 리스크 (날짜+군사어, 참사+이벤트표현, 집게손+소시지, 고인문구+제품효능)
+I. AI·저작권 리스크 (가상인물미표기, AI포비아, 사과문AI작성, 저작권침해)
+J. 맥락·날짜·DEI (Context Collapse, 추모일발행, 다양성·포용성)
+
+JSON:
+{"score":0~100,"level":0~4,"level_label":"Level 0 통과" 또는 "Level 1 담당자 확인" 또는 "Level 2 팀장 검수" 또는 "Level 3 자동 보류" 또는 "Level 4 게시 불가","verdict":"발행 가능" 또는 "재검토 필요" 또는 "발행 보류" 또는 "게시 불가","verdict_reason":"구체적 근거 포함 한 문장","date_alerts":[{"date":"X월 X일","event":"사건명","risk":"구체적 리스크"}],"keyword_alerts":[{"keyword":"감지어","category":"카테고리","risk":"리스크 설명"}],"combo_alerts":[{"combo":"조합설명","risk":"리스크 설명"}],"checks":[{"category":"카테고리명","items":[{"label":"항목","status":"pass" 또는 "warn" 또는 "fail" 또는 "block" 또는 "skip","level":"필수" 또는 "주의" 또는 "확인","note":"발견 위치·내용 구체적 기술"}]}],"actions":["즉시 조치 사항"]}`;
+
+    const resp=await puter.ai.chat(prompt,{model:'gpt-4o-mini'});
+    clearInterval(iv);
+    const raw=resp?.message?.content||resp?.toString()||'';
+    if(!raw)throw new Error('AI 응답이 비어있습니다.');
+    const jm=raw.replace(/```json|```/g,'').trim().match(/\{[\s\S]*\}/);
+    if(!jm)throw new Error('응답 파싱 오류. 다시 시도해주세요.');
+    renderResult(JSON.parse(jm[0]));
+
+  }catch(e){
+    clearInterval(iv);
+    const isAuth=e.message&&(e.message.includes('auth')||e.message.includes('login')||e.message.includes('sign'));
+    document.getElementById('result').innerHTML=`<div class="card" style="text-align:center;padding:28px 20px">
+      <i class="ti ti-alert-circle" style="font-size:34px;color:#C0392B;display:block;margin-bottom:10px"></i>
+      <p style="color:#C0392B;font-weight:700;margin-bottom:6px">분석 중 오류가 발생했습니다</p>
+      <p style="font-size:12px;color:#9CA3AF;margin-top:4px">${e.message}</p>
+      ${isAuth?`<p style="font-size:13px;color:#374151;margin-top:10px">Puter 로그인이 필요합니다.</p><button onclick="puter.auth.signIn().then(()=>location.reload())" style="margin-top:12px;padding:10px 20px;border-radius:8px;border:none;background:#1B3A6B;color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">Puter 로그인</button>`:''}
+      <button class="btn-reset" onclick="resetForm()" style="margin-top:12px">다시 시도</button>
+    </div>`;
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+// 10. 결과 렌더링
+// ══════════════════════════════════════════════════════════════
+function renderResult(r){
+  const score=Math.round(r.score||0);
+  const level=r.level??0;
+  const bc=level===0?'pass':level===1||level===2?'warn':level===3?'fail':'block';
+  const icon=bc==='pass'?'ti-circle-check':bc==='warn'?'ti-alert-triangle':bc==='fail'?'ti-ban':'ti-forbid-2';
+  const si={pass:'ti-check',warn:'ti-alert-triangle',fail:'ti-x',block:'ti-forbid-2',skip:'ti-minus'};
+  const lm={'필수':'req','주의':'caut','확인':'chk','차단':'block'};
+  const levelClass=['l0','l1','l2','l3','l4'];
+
+  // 날짜 경보
+  let dateHtml='';
+  if((r.date_alerts||[]).length>0){
+    dateHtml=`<div class="alert-box date"><div class="alert-box-ttl"><i class="ti ti-calendar-exclamation"></i> 📅 날짜 리스크 상세</div><div class="alert-box-body">${r.date_alerts.map(a=>`<strong>📅 ${a.date} = ${a.event}</strong><br>${a.risk}`).join('<br><br>')}</div></div>`;
+  }
+  // 키워드 경보
+  let kwHtml='';
+  if((r.keyword_alerts||[]).length>0){
+    kwHtml=`<div class="alert-box keyword"><div class="alert-box-ttl"><i class="ti ti-alert-triangle"></i> ⚠️ 위험 키워드 상세</div><div class="alert-box-body">${r.keyword_alerts.map(a=>`<strong>"${a.keyword}"</strong> [${a.category}]<br>${a.risk}`).join('<br><br>')}</div></div>`;
+  }
+  // 조합 경보
+  let comboHtml='';
+  if((r.combo_alerts||[]).length>0){
+    comboHtml=`<div class="alert-box combo"><div class="alert-box-ttl"><i class="ti ti-link"></i> 🔗 조합 리스크 상세</div><div class="alert-box-body">${r.combo_alerts.map(a=>`<strong>${a.combo}</strong><br>${a.risk}`).join('<br><br>')}</div></div>`;
+  }
+  // 젠더 이미지 경보
+  let genderHtml='';
+  const genderChecks=(r.checks||[]).flatMap(c=>c.items||[]).filter(it=>it.status==='fail'&&it.label&&it.label.includes('젠더'));
+  if(genderChecks.length>0){
+    genderHtml=`<div class="alert-box gender"><div class="alert-box-ttl"><i class="ti ti-gender-ambiguous"></i> 젠더 이미지 리스크</div><div class="alert-box-body">${genderChecks.map(it=>`<strong>${it.label}</strong><br>${it.note}`).join('<br><br>')}</div></div>`;
+  }
+
+  // 체크 항목
+  let ch='';
+  (r.checks||[]).forEach(cat=>{
+    const its=(cat.items||[]).map(it=>`
+      <div class="ci ${it.status||'skip'}">
+        <i class="ti ${si[it.status]||'ti-minus'} ci-ico"></i>
+        <div>
+          <div class="ci-lbl">${it.label} <span class="tag ${lm[it.level]||'chk'}">${it.level}</span></div>
+          ${it.note?`<div class="ci-note">${it.note}</div>`:''}
+        </div>
+      </div>`).join('');
+    ch+=`<div class="cgroup"><div class="cg-lbl">${cat.category}</div>${its}</div>`;
+  });
+
+  const acts=(r.actions||[]);
+  const aH=acts.length?`<div class="abox"><div class="abox-ttl"><i class="ti ti-list-check"></i> 즉시 조치 필요 사항</div><ul class="alist">${acts.map(a=>`<li>${a}</li>`).join('')}</ul></div>`:'';
+
+  document.getElementById('result').innerHTML=`
+    <div class="card">
+      <div class="banner ${bc}">
+        <i class="ti ${icon} bico"></i>
+        <div class="btxt">
+          <div class="bv">${r.verdict}</div>
+          <div class="br">${r.verdict_reason||''}</div>
+        </div>
+        <div class="bs">${score}<span class="bsu">점</span></div>
+      </div>
+      <div class="level-badge ${levelClass[level]||'l0'}">
+        <i class="ti ti-layers" style="font-size:12px"></i> ${r.level_label||`Level ${level}`}
+      </div>
+      ${dateHtml}${kwHtml}${comboHtml}${genderHtml}
+      ${ch}
+      ${aH}
+      <p class="res-foot">AI 분석 결과는 참고용이며 최종 판단은 담당자·조직장 확인 후 결정하세요</p>
+    </div>
+    <button class="btn-reset" onclick="resetForm()"><i class="ti ti-refresh" style="font-size:13px;vertical-align:-2px;margin-right:4px"></i> 새 콘텐츠 검수하기</button>`;
+}
+
+function resetForm(){
+  imgFiles.length=0;vidFiles.length=0;
+  ['img-prev','vid-prev'].forEach(id=>document.getElementById(id).innerHTML='');
+  ['img-box','vid-box'].forEach(id=>document.getElementById(id).classList.remove('on'));
+  document.getElementById('caption').value='';
+  document.getElementById('pubdate').value='';
+  document.getElementById('result').innerHTML='';
+  ['alert-date','alert-keyword','alert-combo','alert-pubdate'].forEach(id=>{document.getElementById(id).style.display='none';});
+  document.getElementById('img-in').value='';
+  document.getElementById('vid-in').value='';
+  lastRuleAlerts={dateAlerts:[],keywordHits:[],comboHits:[]};
+  lastPubDateAlerts=[];
+  document.getElementById('run-hint').style.color='#C0392B';
+  updateBtn();
+}
+</script>
+</body>
+</html>
