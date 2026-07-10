@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>소셜 콘텐츠 자동 검수 시스템 v2</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<script src="https://js.puter.com/v2/"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#1B3A6B;--blue:#2E75B6;--blue-l:#E8F2FB;
+  --red:#C0392B;--red-l:#FDECEA;
+  --amber:#92600A;--amber-l:#FEF3DC;--amber-b:#F5C57A;
+  --green:#1A7A4A;--green-l:#E8F6EE;--green-b:#8FCB9B;
+  --purple:#6B21A8;--purple-l:#F5F0FF;
+  --g0:#fff;--g1:#F7F8FA;--g2:#F0F2F5;--g3:#E4E7EC;
+  --g4:#9CA3AF;--g5:#6B7280;--g6:#374151;--g7:#111827;
+  --r:8px;--font:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans KR',sans-serif;
+}
+body{font-family:var(--font);background:#EEF2F8;color:var(--g7);min-height:100vh;padding:24px 16px 60px}
+.page{max-width:720px;margin:0 auto}
+.hdr{background:var(--navy);border-radius:16px;padding:22px 26px;margin-bottom:16px;display:flex;align-items:center;gap:14px}
+.hdr-ico{width:48px;height:48px;background:rgba(255,255,255,.15);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:24px;color:#fff;flex-shrink:0}
+.hdr h1{font-size:17px;font-weight:700;color:#fff;margin-bottom:3px}
+.hdr p{font-size:12px;color:rgba(255,255,255,.65);line-height:1.5}
+.badges{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px}
+.badge{display:inline-flex;align-items:center;gap:4px;background:rgba(255,255,255,.15);color:#fff;border-radius:20px;font-size:11px;font-weight:700;padding:3px 10px}
+.card{background:var(--g0);border-radius:14px;padding:18px 20px;margin-bottom:14px;border:1px solid var(--g3)}
+.card-ttl{font-size:12px;font-weight:700;color:var(--g5);text-transform:uppercase;letter-spacing:.05em;margin-bottom:14px;display:flex;align-items:center;gap:5px}
+.card-ttl i{font-size:14px;color:var(--blue)}
+.info-banner{background:var(--green-l);border:1.5px solid var(--green-b);border-radius:12px;padding:14px 16px;margin-bottom:14px;display:flex;align-items:flex-start;gap:10px}
+.info-banner i{font-size:20px;color:var(--green);flex-shrink:0;margin-top:1px}
+.info-banner p{font-size:13px;color:#145A38;line-height:1.6}
+.upload-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.ubox{border:2px dashed var(--g3);border-radius:12px;padding:18px 12px;cursor:pointer;text-align:center;background:var(--g1);transition:border-color .15s,background .15s;min-height:110px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start}
+.ubox:hover{border-color:var(--blue);background:var(--blue-l)}
+.ubox.on{border-style:solid;border-color:var(--blue);background:var(--blue-l)}
+.ubox .ui{font-size:28px;color:var(--g4);margin-bottom:6px}
+.ubox.on .ui{color:var(--blue)}
+.ubox .ul{font-size:13px;font-weight:600;color:var(--g5)}
+.ubox.on .ul{color:var(--blue)}
+.ubox .us{font-size:11px;color:var(--g4);margin-top:2px}
+.pg{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px;justify-content:center}
+.pi{position:relative;width:52px;height:52px}
+.pi img{width:52px;height:52px;object-fit:cover;border-radius:6px;border:1px solid var(--g3);display:block}
+.pi .vt{width:52px;height:52px;background:var(--g2);border-radius:6px;display:flex;align-items:center;justify-content:center;border:1px solid var(--g3)}
+.pi .vt i{font-size:20px;color:var(--g4)}
+.pi .rb{position:absolute;top:-5px;right:-5px;width:16px;height:16px;border-radius:50%;background:var(--g6);color:#fff;border:none;cursor:pointer;font-size:10px;display:flex;align-items:center;justify-content:center}
+input[type=file]{display:none}
+.fl{font-size:12px;font-weight:600;color:var(--g6);display:block;margin-bottom:6px}
+textarea{width:100%;min-height:96px;font-size:14px;font-family:var(--font);padding:11px 13px;border-radius:var(--r);border:1.5px solid var(--g3);background:var(--g1);color:var(--g7);resize:vertical;transition:border-color .15s}
+textarea:focus{outline:none;border-color:var(--blue);background:#fff}
+textarea::placeholder{color:var(--g4)}
+.ctx{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px;margin-bottom:8px}
+select,input[type=date]{width:100%;font-size:13px;font-family:var(--font);padding:9px 11px;border-radius:var(--r);border:1.5px solid var(--g3);background:var(--g1);color:var(--g7);cursor:pointer}
+select:focus,input[type=date]:focus{outline:none;border-color:var(--blue)}
+.btn-run{width:100%;padding:13px;border-radius:10px;border:none;background:var(--navy);color:#fff;font-size:15px;font-weight:700;font-family:var(--font);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:background .15s;margin-top:14px}
+.btn-run:hover{background:#152E56}
+.btn-run:disabled{background:var(--g3);color:var(--g4);cursor:not-allowed}
+.btn-run i{font-size:18px}
+.btn-hint{font-size:12px;text-align:center;margin-top:7px}
+.btn-reset{display:block;width:100%;margin-top:10px;padding:10px;border-radius:var(--r);border:1.5px solid var(--g3);background:var(--g0);font-size:13px;color:var(--g5);font-family:var(--font);cursor:pointer}
+.btn-reset:hover{background:var(--g1)}
+.pre-alert{border-radius:10px;padding:12px 14px;margin-top:10px;display:none}
+.pre-alert.date-type{background:#FFF3F3;border:2px solid #E74C3C}
+.pre-alert.keyword-type{background:#FFF8F0;border:2px solid #E67E22}
+.pre-alert.combo-type{background:#F8F0FF;border:2px solid #8B5CF6}
+.pre-alert-ttl{font-size:12px;font-weight:700;display:flex;align-items:center;gap:5px;margin-bottom:6px}
+.pre-alert.date-type .pre-alert-ttl{color:#C0392B}
+.pre-alert.keyword-type .pre-alert-ttl{color:#D35400}
+.pre-alert.combo-type .pre-alert-ttl{color:#6B21A8}
+.pre-alert-body{font-size:12px;color:var(--g6);line-height:1.7}
+.pre-alert-body strong{font-weight:700}
+.loading{text-align:center;padding:40px 20px}
+.spinner{width:38px;height:38px;border:3px solid var(--g3);border-top-color:var(--blue);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 12px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading p{font-size:14px;color:var(--g6)}
+.lstep{font-size:12px;color:var(--g4);margin-top:5px}
+.banner{border-radius:12px;padding:16px 18px;margin-bottom:12px;display:flex;align-items:center;gap:12px}
+.banner.pass{background:var(--green-l);border:1.5px solid var(--green-b)}
+.banner.warn{background:var(--amber-l);border:1.5px solid var(--amber-b)}
+.banner.fail{background:var(--red-l);border:1.5px solid #F0A0A0}
+.banner.block{background:var(--purple-l);border:2px solid #C4B5FD}
+.bico{font-size:30px;flex-shrink:0}
+.banner.pass .bico{color:var(--green)}.banner.warn .bico{color:var(--amber)}.banner.fail .bico,.banner.block .bico{color:var(--red)}
+.btxt{flex:1}
+.bv{font-size:17px;font-weight:700;color:var(--g7)}
+.br{font-size:12px;color:var(--g5);margin-top:3px;line-height:1.5}
+.bs{font-size:32px;font-weight:700;flex-shrink:0}
+.banner.pass .bs{color:var(--green)}.banner.warn .bs{color:var(--amber)}.banner.fail .bs,.banner.block .bs{color:var(--red)}
+.bsu{font-size:14px;font-weight:400}
+.level-badge{display:inline-flex;align-items:center;gap:4px;border-radius:6px;font-size:11px;font-weight:700;padding:4px 10px;margin-bottom:14px}
+.level-badge.l0{background:var(--green-l);color:var(--green);border:1px solid var(--green-b)}
+.level-badge.l1{background:#EFF6FF;color:#1D4ED8;border:1px solid #93C5FD}
+.level-badge.l2{background:var(--amber-l);color:var(--amber);border:1px solid var(--amber-b)}
+.level-badge.l3{background:var(--red-l);color:var(--red);border:1px solid #F0A0A0}
+.level-badge.l4{background:var(--purple-l);color:var(--purple);border:1px solid #C4B5FD}
+.alert-box{border-radius:10px;padding:12px 14px;margin-bottom:8px}
+.alert-box.date{background:#FFF3F3;border:2px solid #E74C3C}
+.alert-box.keyword{background:#FFF8F0;border:2px solid #E67E22}
+.alert-box.combo{background:#F8F0FF;border:2px solid #8B5CF6}
+.alert-box-ttl{font-size:12px;font-weight:700;display:flex;align-items:center;gap:5px;margin-bottom:5px}
+.alert-box.date .alert-box-ttl{color:#C0392B}
+.alert-box.keyword .alert-box-ttl{color:#D35400}
+.alert-box.combo .alert-box-ttl{color:#6B21A8}
+.alert-box-body{font-size:12px;color:var(--g6);line-height:1.65}
+.alert-box-body strong{font-weight:700}
+.cgroup{margin-bottom:16px}
+.cg-lbl{font-size:11px;font-weight:700;color:var(--g4);text-transform:uppercase;letter-spacing:.07em;margin-bottom:7px;padding-left:2px}
+.ci{display:flex;align-items:flex-start;gap:9px;padding:10px 13px;border-radius:var(--r);border:1px solid var(--g3);background:var(--g1);margin-bottom:5px}
+.ci.ok{background:var(--green-l);border-color:var(--green-b)}
+.ci.warn{background:var(--amber-l);border-color:var(--amber-b)}
+.ci.fail{background:var(--red-l);border-color:#F0A0A0}
+.ci.block{background:var(--purple-l);border-color:#C4B5FD}
+.ci.skip{opacity:.5}
+.ci-ico{font-size:16px;flex-shrink:0;margin-top:1px}
+.ci.ok .ci-ico{color:var(--green)}.ci.warn .ci-ico{color:var(--amber)}.ci.fail .ci-ico,.ci.block .ci-ico{color:var(--red)}.ci.skip .ci-ico{color:var(--g4)}
+.ci-lbl{font-size:13px;font-weight:600;color:var(--g7);line-height:1.4;display:flex;align-items:center;flex-wrap:wrap;gap:5px}
+.ci-note{font-size:12px;color:var(--g5);margin-top:3px;line-height:1.55}
+.tag{display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px}
+.tag.req{background:#FDECEA;color:#A93226}
+.tag.caut{background:var(--amber-l);color:var(--amber);border:1px solid var(--amber-b)}
+.tag.chk{background:var(--blue-l);color:var(--blue)}
+.abox{background:var(--g1);border-radius:10px;border:1.5px solid var(--g3);padding:14px 16px;margin-top:4px}
+.abox-ttl{font-size:13px;font-weight:700;color:var(--g7);margin-bottom:9px;display:flex;align-items:center;gap:5px}
+.abox-ttl i{color:var(--blue);font-size:15px}
+.alist{list-style:none}
+.alist li{font-size:12px;color:var(--g5);padding:5px 0;border-bottom:1px solid var(--g3);display:flex;align-items:flex-start;gap:7px;line-height:1.55}
+.alist li:last-child{border:none}
+.alist li::before{content:"→";color:var(--blue);flex-shrink:0}
+.res-foot{text-align:center;font-size:11px;color:var(--g4);margin-top:14px}
+/* 이미지 분석 상태 표시 */
+.img-status{font-size:11px;color:var(--g4);text-align:center;margin-top:6px;font-style:italic}
+@media(max-width:520px){.upload-grid,.ctx{grid-template-columns:1fr}.hdr{flex-direction:column;text-align:center}}
+</style>
+</head>
+<body>
+<div class="page">
+
+<div class="hdr">
+  <div class="hdr-ico"><i class="ti ti-shield-check"></i></div>
+  <div>
+    <h1>소셜 콘텐츠 자동 검수 시스템 <span style="font-size:11px;opacity:.6">v2.0</span></h1>
+    <p>이미지·영상·캡션을 업로드하면 AI가 가이드라인 기준으로 리스크를 분석합니다</p>
+    <div class="badges">
+      <span class="badge"><i class="ti ti-sparkles" style="font-size:11px"></i> 완전 무료</span>
+      <span class="badge"><i class="ti ti-calendar-exclamation" style="font-size:11px"></i> 날짜 DB</span>
+      <span class="badge"><i class="ti ti-alert-triangle" style="font-size:11px"></i> 키워드 조합 감지</span>
+      <span class="badge"><i class="ti ti-layers" style="font-size:11px"></i> 5단계 등급</span>
+    </div>
+  </div>
+</div>
+
+<div class="info-banner">
+  <i class="ti ti-info-circle"></i>
+  <p><strong>API 키 없이 무료로 사용 가능합니다.</strong><br>
+  처음 실행 시 <a href="https://puter.com" target="_blank" style="color:var(--blue);font-weight:700">puter.com</a>에서 Google 계정으로 먼저 가입·로그인 후 이용해 주세요.</p>
+</div>
+
+<div class="card">
+  <div class="card-ttl"><i class="ti ti-upload"></i> 콘텐츠 업로드</div>
+
+  <div class="upload-grid">
+    <div class="ubox" id="img-box" onclick="document.getElementById('img-in').click()">
+      <i class="ti ti-photo ui"></i>
+      <div class="ul">이미지 업로드</div>
+      <div class="us">JPG, PNG, GIF, WEBP</div>
+      <div class="pg" id="img-prev" onclick="event.stopPropagation()"></div>
+    </div>
+    <div class="ubox" id="vid-box" onclick="document.getElementById('vid-in').click()">
+      <i class="ti ti-video ui"></i>
+      <div class="ul">영상 업로드</div>
+      <div class="us">MP4, MOV, AVI (썸네일 분석)</div>
+      <div class="pg" id="vid-prev" onclick="event.stopPropagation()"></div>
+    </div>
+  </div>
+  <input type="file" id="img-in" accept="image/*" multiple>
+  <input type="file" id="vid-in" accept="video/*" multiple>
+  <div class="img-status" id="img-status"></div>
+
+  <label class="fl" for="caption" style="margin-top:14px">캡션 / 본문 텍스트</label>
+  <textarea id="caption" placeholder="게시할 캡션, 해시태그, 이벤트 문구, 이벤트 코드명 등을 입력하세요..." oninput="onTextInput()"></textarea>
+
+  <div class="pre-alert date-type" id="alert-date">
+    <div class="pre-alert-ttl"><i class="ti ti-calendar-exclamation"></i> 📅 날짜 리스크 감지</div>
+    <div class="pre-alert-body" id="alert-date-body"></div>
+  </div>
+  <div class="pre-alert keyword-type" id="alert-keyword">
+    <div class="pre-alert-ttl"><i class="ti ti-alert-triangle"></i> ⚠️ 위험 키워드 감지</div>
+    <div class="pre-alert-body" id="alert-keyword-body"></div>
+  </div>
+  <div class="pre-alert combo-type" id="alert-combo">
+    <div class="pre-alert-ttl"><i class="ti ti-link"></i> 🔗 조합·다방향 읽기 리스크 감지</div>
+    <div class="pre-alert-body" id="alert-combo-body"></div>
+  </div>
+
+  <div class="ctx">
+    <div>
+      <label class="fl" for="channel">발행 채널</label>
+      <select id="channel">
+        <option value="instagram">인스타그램</option>
+        <option value="threads">스레드(Threads)</option>
+        <option value="youtube">유튜브</option>
+        <option value="tiktok">틱톡</option>
+        <option value="blog">블로그</option>
+        <option value="facebook">페이스북</option>
+        <option value="twitter">X(트위터)</option>
+      </select>
+    </div>
+    <div>
+      <label class="fl" for="pubdate">발행 예정일 <span style="color:var(--red);font-weight:700">*필수</span></label>
+      <input type="date" id="pubdate" onchange="onDateChange()" required>
+    </div>
+  </div>
+
+  <div class="pre-alert date-type" id="alert-pubdate" style="margin-bottom:0">
+    <div class="pre-alert-ttl"><i class="ti ti-calendar-exclamation"></i> 📅 발행 예정일 리스크</div>
+    <div class="pre-alert-body" id="alert-pubdate-body"></div>
+  </div>
+
+  <button class="btn-run" id="run-btn" onclick="runAnalysis()" disabled>
+    <i class="ti ti-robot"></i> AI 검수 시작
+  </button>
+  <p class="btn-hint" id="run-hint" style="color:var(--red)">발행 예정일을 먼저 선택해주세요</p>
+</div>
+
+<div id="result"></div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════
+// 민감 날짜 DB
+// ══════════════════════════════════════════════
+const SD=[
+  {M:1,D:17,L:3,name:"1·17 대구 지하철 화재",desc:"2003년 대구 지하철 참사 (192명 사망)"},
+  {M:3,D:1, L:3,name:"3·1절",desc:"독립운동 기념일 — 정치·이념 연상 표현 주의"},
+  {M:3,D:26,L:3,name:"천안함 피격일",desc:"2010년 천안함 폭침 (46명 전사)"},
+  {M:4,D:3, L:4,name:"4·3 제주 4·3 사건",desc:"제주 4·3 사건 — 관련 표현·소재 극도 주의"},
+  {M:4,D:16,L:4,name:"4·16 세월호 참사",desc:"2014년 세월호 침몰 (304명 사망·실종) — 유희성 콘텐츠 전면 금지"},
+  {M:4,D:19,L:3,name:"4·19 혁명",desc:"4·19 혁명 기념일 — 정치·이념 연상 소재 주의"},
+  {M:5,D:5, L:2,name:"어린이날",desc:"과장 광고·과소비 조장 금지"},
+  {M:5,D:18,L:4,name:"5·18 광주민주화운동",desc:"1980년 5·18 광주민주화운동 — 탱크·계엄·광주 표현 결합 엄격 금지"},
+  {M:6,D:6, L:3,name:"현충일",desc:"호국영령 추모일 — 유희성 이벤트 자제"},
+  {M:6,D:10,L:3,name:"6·10 민주항쟁",desc:"1987년 민주항쟁 — 정치 연상 소재 주의"},
+  {M:6,D:25,L:4,name:"6·25 한국전쟁",desc:"한국전쟁 발발일 — 전쟁·분단 소재 유희화 금지"},
+  {M:8,D:15,L:3,name:"광복절",desc:"민족주의 과잉 표현·일본 자극 콘텐츠 주의"},
+  {M:10,D:9, L:2,name:"한글날",desc:"언어·표현 민감도 상승 시기"},
+  {M:10,D:29,L:4,name:"10·29 이태원 참사",desc:"2022년 이태원 압사 (159명 사망) — 유희성 콘텐츠 전면 금지"},
+  {M:11,D:11,L:1,name:"빼빼로데이",desc:"상업적 기념일 — 과소비 조장·따돌림 연상 주의"},
+  {M:12,D:3, L:4,name:"12·3 비상계엄",desc:"2024년 비상계엄 선포 — 정치·이념 연상 극도 주의"},
+  {M:12,D:29,L:4,name:"12·29 무안공항 참사",desc:"2024년 제주항공 여객기 사고 (179명 사망) — 항공·여행 경쾌한 표현 주의"},
+];
+const DB=7, DA=3;
+
+function getDateAlerts(M,D){
+  return SD.filter(s=>{
+    if(s.M!==M)return false;
+    const d=D-s.D;
+    return d>=-DA&&d<=DB;
+  });
+}
+
+// ══════════════════════════════════════════════
+// 텍스트에서 날짜 추출
+// ══════════════════════════════════════════════
+function extractDates(text){
+  const found=[];
+  const pats=[
+    /(\d{1,2})월\s*(\d{1,2})일/g,
+    /(\d{1,2})\/(\d{1,2})/g,
+    /(\d{1,2})\.(\d{1,2})/g,
+    /·(\d{1,2})·(\d{1,2})/g,
+  ];
+  pats.forEach(re=>{
+    let m;const r=new RegExp(re.source,'g');
+    while((m=r.exec(text))!==null){
+      const mo=parseInt(m[1]),da=parseInt(m[2]);
+      if(mo>=1&&mo<=12&&da>=1&&da<=31)found.push({M:mo,D:da,raw:m[0]});
+    }
+  });
+  // 붙여쓰기 숫자 (416, 518, 625, 1029, 1229 등)
+  const nums=text.match(/\b\d{3,4}\b/g)||[];
+  nums.forEach(n=>{
+    const s=n.toString();
+    let mo,da;
+    if(s.length===3){mo=parseInt(s[0]);da=parseInt(s.slice(1));}
+    else{mo=parseInt(s.slice(0,2));da=parseInt(s.slice(2));}
+    if(mo>=1&&mo<=12&&da>=1&&da<=31)found.push({M:mo,D:da,raw:n});
+  });
+  return found;
+}
+
+// ══════════════════════════════════════════════
+// 키워드 DB
+// ══════════════════════════════════════════════
+const KW=[
+  {w:["세월호","416","4.16","4·16","노란 리본","노란리본","침몰","가라앉","구명조끼","수학여행","단원고","팽목항"],cat:"세월호 참사",L:4},
+  {w:["이태원","1029","10.29","10·29","압사","핼러윈 참사","골목 사고","인파 사고"],cat:"이태원 참사",L:4},
+  {w:["518","5.18","5·18","광주 민주","계엄군","탱크데이","탱크 할인","공수부대","폭도","금남로","오월 광주"],cat:"5·18 광주민주화운동",L:4},
+  {w:["탱크"],cat:"탱크 — 5·18/6·25 참사 직접 연상 (단독 사용도 위험)",L:3},
+  {w:["625","6.25","6·25","북침","남침","인민군 포격"],cat:"6·25 한국전쟁",L:4},
+  {w:["무안공항","제주항공 사고","제주항공 참사","2216","동체착륙","조류충돌","콘크리트 둔덕","활주로 이탈","항공 참사","1229","12.29","12·29"],cat:"무안공항 참사",L:4},
+  {w:["비상계엄","계엄 선포","계엄령","12·3","123계엄","윤석열 계엄","내란"],cat:"12·3 비상계엄",L:4},
+  {w:["탁 치니 억","책상을 탁","억하고","남영동","고문 치사","박종철"],cat:"박종철 사건 연상",L:4},
+  {w:["노무","노무노무","운지","노알라","부엉이바위"],cat:"고인(노무현) 조롱 밈 — 단독도 위험",L:4},
+  {w:["일베","ㅇㅂ","민주화시키다","홍어","전라디언","좌좀","빨갱이","종북","토착왜구"],cat:"극우·혐오 은어",L:4},
+  {w:["한남","한녀","김치녀","된장녀","맘충","애비충","퐁퐁남","설거지론"],cat:"젠더 혐오 표현",L:3},
+  {w:["틀딱","잼민이","급식충"],cat:"연령 혐오 표현",L:3},
+  {w:["병신","장애냐","자폐냐","정신병자"],cat:"장애 비하 표현",L:4},
+  {w:["짱깨","쪽바리","깜둥이"],cat:"인종·국적 비하 표현",L:4},
+  {w:["딥페이크","deepfake"],cat:"딥페이크 연상 표현 — 범죄 이미지",L:2},
+  {w:["ㅂㅅ","ㅅㅂ","ㄷㅊ"],cat:"욕설 초성 은어",L:3},
+  {w:["416%","518%","625%","1029%","1229%"],cat:"민감 날짜 숫자 할인율",L:4},
+];
+
+const INSTANT=[
+  {w:"탱크",cat:"탱크 — 참사 연상",L:3},{w:"노무",cat:"고인 조롱 밈 연상",L:3},
+  {w:"운지",cat:"고인 조롱 밈",L:4},{w:"홍어",cat:"지역 혐오",L:4},
+  {w:"틀딱",cat:"노인 혐오",L:3},{w:"맘충",cat:"젠더·부모 비하",L:3},
+  {w:"한남",cat:"젠더 혐오",L:3},{w:"한녀",cat:"젠더 혐오",L:3},
+  {w:"병신",cat:"장애 비하",L:4},{w:"빨갱이",cat:"정치 혐오",L:4},
+  {w:"짱깨",cat:"인종 비하",L:4},{w:"쪽바리",cat:"인종 비하",L:4},
+  {w:"폭도",cat:"5·18 혐오 프레임",L:4},{w:"침몰",cat:"세월호 연상",L:3},
+  {w:"압사",cat:"이태원 참사 연상",L:3},{w:"계엄",cat:"12·3 비상계엄 연상",L:3},
+  {w:"좌좀",cat:"정치 진영 혐오",L:3},{w:"종북",cat:"정치 혐오",L:4},
+];
+
+const COMBOS=[
+  {a:["518","5.18","5·18","광주"],b:["탱크","계엄","공수","진압","폭도"],desc:"5·18 + 군사 표현 조합"},
+  {a:["625","6.25","한국전쟁"],b:["침투","진압","포격","싹쓸이"],desc:"6·25 + 공격적 동사 조합"},
+  {a:["416","세월호","4.16"],b:["가라앉","침몰","빠지","잠수","물속"],desc:"세월호 + 침몰 표현 조합"},
+  {a:["1029","이태원","10.29"],b:["압사","핼러윈","골목","CPR"],desc:"이태원 + 관련 표현 조합"},
+  {a:["1229","무안","제주항공","12.29"],b:["추락","활주로","착륙","항공","비행"],desc:"무안공항 + 항공 표현 조합"},
+  {a:["집게손","핀치","소시지","핫도그"],b:["작다","작아도","작지만","손가락"],desc:"집게손 + 소시지/크기 카피 — GS25류 젠더 논란"},
+  {a:["탁 치니","책상을 탁","억하고"],b:["효능","효과","딱","즉시","바로"],desc:"박종철 연상 문구 + 제품 효능 조합"},
+];
+
+// ══════════════════════════════════════════════
+// 감지 함수들
+// ══════════════════════════════════════════════
+function detectKeywords(text){
+  const hits=[];
+  const norm=text.replace(/\s+/g,'').replace(/[.·\-_\/]/g,'').toLowerCase();
+  KW.forEach(rule=>rule.w.forEach(w=>{
+    const wn=w.replace(/\s+/g,'').replace(/[.·\-_\/]/g,'').toLowerCase();
+    if((text.includes(w)||norm.includes(wn))&&!hits.find(h=>h.word===w))
+      hits.push({word:w,cat:rule.cat,L:rule.L});
+  }));
+  INSTANT.forEach(r=>{
+    if(text.includes(r.w)&&!hits.find(h=>h.word===r.w))
+      hits.push({word:r.w,cat:r.cat,L:r.L});
+  });
+  return hits;
+}
+
+function detectCombos(text){
+  return COMBOS.filter(r=>r.a.some(w=>text.includes(w))&&r.b.some(w=>text.includes(w)))
+    .map(r=>({desc:r.desc,foundA:r.a.filter(w=>text.includes(w)),foundB:r.b.filter(w=>text.includes(w))}));
+}
+
+function detectHiddenReading(text){
+  const results=[];
+  const words=text.split(/\s+/).filter(w=>w.length>0);
+  if(words.length>=2){
+    const fc=words.map(w=>w[0]).join('');
+    const bad=['ㅇㅂ','ㅂㅅ','ㅅㅂ','ㄷㅊ','ㅈㄴ'];
+    bad.forEach(b=>{if(fc.includes(b))results.push({type:'첫글자 조합',desc:`단어 첫 글자 조합 "${fc}" 내 "${b}" 감지 — 욕설·은어 초성 의심`});});
+  }
+  const tags=text.match(/#[\w가-힣]+/g)||[];
+  tags.forEach(tag=>{
+    const chars=[...tag.slice(1)];
+    const v=chars.join('');
+    ['병','신','새','끼','씨','발','지','랄'].forEach(dw=>{
+      if(v.includes(dw))results.push({type:'해시태그 숨은 글자',desc:`해시태그 "${tag}" 내 "${dw}" 감지 — 조합 의미 확인 필요`});
+    });
+  });
+  return results;
+}
+
+// ══════════════════════════════════════════════
+// 실시간 체크
+// ══════════════════════════════════════════════
+let lastAlerts={dateAlerts:[],kwHits:[],combos:[],hidden:[]};
+let lastPubAlerts=[];
+
+function onTextInput(){
+  const text=document.getElementById('caption').value;
+  // 날짜
+  const dates=extractDates(text);
+  const dateAlerts=[];
+  dates.forEach(d=>getDateAlerts(d.M,d.D).forEach(s=>{if(!dateAlerts.find(x=>x.name===s.name))dateAlerts.push({raw:d.raw,...s});}));
+  // 키워드
+  const kwHits=detectKeywords(text);
+  // 조합
+  const combos=detectCombos(text);
+  // 다방향
+  const hidden=detectHiddenReading(text);
+  lastAlerts={dateAlerts,kwHits,combos,hidden};
+  renderAlerts(dateAlerts,kwHits,combos,hidden);
+  updateBtn();
+}
+
+function onDateChange(){
+  const val=document.getElementById('pubdate').value;
+  const box=document.getElementById('alert-pubdate');
+  const body=document.getElementById('alert-pubdate-body');
+  if(!val){box.style.display='none';lastPubAlerts=[];updateBtn();return;}
+  const d=new Date(val);
+  const alerts=getDateAlerts(d.getMonth()+1,d.getDate());
+  lastPubAlerts=alerts;
+  if(alerts.length>0){
+    box.style.display='block';
+    body.innerHTML=alerts.map(a=>`발행 예정일 <strong>${d.getMonth()+1}월 ${d.getDate()}일</strong> = <strong>${a.name}</strong> 전후<br>${a.desc}`).join('<br><br>');
+  }else{box.style.display='none';}
+  updateBtn();
+}
+
+function renderAlerts(dateAlerts,kwHits,combos,hidden){
+  // 날짜
+  const db=document.getElementById('alert-date');
+  if(dateAlerts.length>0){
+    db.style.display='block';
+    document.getElementById('alert-date-body').innerHTML=dateAlerts.map(a=>`텍스트 내 <strong>"${a.raw}"</strong> → <strong>${a.name}</strong> (Level ${a.L})<br>${a.desc}`).join('<br><br>');
+  }else{db.style.display='none';}
+  // 키워드
+  const kb=document.getElementById('alert-keyword');
+  const high=kwHits.filter(h=>h.L>=2);
+  if(high.length>0){
+    kb.style.display='block';
+    const g={};high.forEach(h=>{if(!g[h.cat])g[h.cat]=[];g[h.cat].push(h.word);});
+    document.getElementById('alert-keyword-body').innerHTML=Object.entries(g).map(([c,ws])=>`<strong>[${c}]</strong> 감지: ${ws.map(w=>`"${w}"`).join(', ')}`).join('<br>');
+  }else{kb.style.display='none';}
+  // 조합+다방향
+  const cb=document.getElementById('alert-combo');
+  const items=[
+    ...combos.map(h=>`<strong>${h.desc}</strong><br>감지: ${[...h.foundA,...h.foundB].map(w=>`"${w}"`).join(' × ')}`),
+    ...hidden.map(h=>`<strong>🔠 다방향 읽기 [${h.type}]</strong><br>${h.desc}`)
+  ];
+  if(items.length>0){cb.style.display='block';document.getElementById('alert-combo-body').innerHTML=items.join('<br><br>');}
+  else{cb.style.display='none';}
+}
+
+// ══════════════════════════════════════════════
+// 파일 업로드
+// ══════════════════════════════════════════════
+const imgFiles=[],vidFiles=[];
+
+function updateBtn(){
+  const hasC=imgFiles.length>0||vidFiles.length>0||document.getElementById('caption').value.trim().length>0;
+  const hasD=!!document.getElementById('pubdate').value;
+  document.getElementById('run-btn').disabled=!(hasC&&hasD);
+  const hint=document.getElementById('run-hint');
+  if(!hasD){hint.textContent='발행 예정일을 먼저 선택해주세요';hint.style.color='var(--red)';}
+  else if(!hasC){hint.textContent='이미지 또는 텍스트 중 하나 이상 입력하세요';hint.style.color='var(--g4)';}
+  else{hint.textContent='';hint.style.color='';}
+  const di=document.getElementById('pubdate');
+  di.style.borderColor=hasD?'var(--green-b)':'var(--red)';
+}
+
+document.getElementById('img-in').addEventListener('change',function(e){
+  Array.from(e.target.files).forEach(function(f){
+    if(imgFiles.find(function(x){return x.name===f.name;}))return;
+    imgFiles.push(f);
+    document.getElementById('img-box').classList.add('on');
+    var objUrl=URL.createObjectURL(f);
+    var d=document.createElement('div');
+    d.className='pi';
+    var img=document.createElement('img');
+    img.src=objUrl;img.alt=f.name;
+    var btn=document.createElement('button');
+    btn.className='rb';btn.textContent='×';
+    btn.addEventListener('click',function(ev){
+      ev.stopPropagation();
+      rmFbyNode('img',f.name,d);
+    });
+    d.appendChild(img);d.appendChild(btn);
+    document.getElementById('img-prev').appendChild(d);
+  });
+  updateImgStatus();
+  updateBtn();
+});
+
+document.getElementById('vid-in').addEventListener('change',function(e){
+  Array.from(e.target.files).forEach(function(f){
+    if(vidFiles.find(function(x){return x.name===f.name;}))return;
+    vidFiles.push(f);
+    document.getElementById('vid-box').classList.add('on');
+    var d=document.createElement('div');
+    d.className='pi';
+    var vt=document.createElement('div');vt.className='vt';
+    var ic=document.createElement('i');ic.className='ti ti-movie';
+    vt.appendChild(ic);
+    var btn=document.createElement('button');
+    btn.className='rb';btn.textContent='×';
+    btn.addEventListener('click',function(ev){
+      ev.stopPropagation();
+      rmFbyNode('vid',f.name,d);
+    });
+    d.appendChild(vt);d.appendChild(btn);
+    document.getElementById('vid-prev').appendChild(d);
+  });
+  updateImgStatus();
+  updateBtn();
+});
+
+function updateImgStatus(){
+  const total=imgFiles.length+vidFiles.length;
+  const s=document.getElementById('img-status');
+  if(total>0)s.textContent='이미지 '+imgFiles.length+'개, 영상 '+vidFiles.length+'개 선택됨'+(vidFiles.length>0?' — 영상은 6개 프레임 추출 후 각각 분석':'');
+  else s.textContent='';
+}
+
+function rmF(type,name,node){
+  rmFbyNode(type,name,node);
+}
+function rmFbyNode(type,name,node){
+  var arr=type==='img'?imgFiles:vidFiles;
+  var i=arr.findIndex(function(x){return x.name===name;});
+  if(i>-1)arr.splice(i,1);
+  if(node&&node.parentNode)node.parentNode.removeChild(node);
+  if(type==='img'&&!imgFiles.length)document.getElementById('img-box').classList.remove('on');
+  if(type==='vid'&&!vidFiles.length)document.getElementById('vid-box').classList.remove('on');
+  updateImgStatus();
+  updateBtn();
+}
+
+async function toB64(file){
+  return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result.split(',')[1]);r.onerror=rej;r.readAsDataURL(file);});
+}
+async function toDataURL(file){
+  return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(file);});
+}
+async function vidThumb(file){
+  // 단일 썸네일 (미리보기용)
+  return new Promise(res=>{
+    const v=document.createElement('video');v.src=URL.createObjectURL(file);
+    v.addEventListener('loadeddata',()=>{v.currentTime=1;});
+    v.addEventListener('seeked',()=>{
+      const c=document.createElement('canvas');c.width=320;c.height=180;
+      c.getContext('2d').drawImage(v,0,0,320,180);
+      res(c.toDataURL('image/jpeg'));
+    });
+    v.addEventListener('error',()=>res(null));
+  });
+}
+
+// 영상에서 여러 시점 프레임 추출 (검수용)
+async function extractVideoFrames(file, frameCount){
+  return new Promise(res=>{
+    const v=document.createElement('video');
+    const frames=[];
+    v.src=URL.createObjectURL(file);
+    v.muted=true;
+    v.addEventListener('error',()=>res([]));
+    v.addEventListener('loadedmetadata',()=>{
+      const dur=v.duration||10;
+      // 영상 길이에 따라 프레임 시점 계산 (시작/1/4/중간/3/4/끝 전)
+      const times=[];
+      for(let i=0;i<frameCount;i++){
+        times.push(Math.min((dur/(frameCount-1))*i, dur-0.1));
+      }
+      let idx=0;
+      function seekNext(){
+        if(idx>=times.length){res(frames);return;}
+        v.currentTime=times[idx];
+      }
+      v.addEventListener('seeked',function(){
+        const canvas=document.createElement('canvas');
+        canvas.width=320;canvas.height=180;
+        canvas.getContext('2d').drawImage(v,0,0,320,180);
+        frames.push({dataUrl:canvas.toDataURL('image/jpeg'),time:Math.round(times[idx])});
+        idx++;
+        seekNext();
+      });
+      seekNext();
+    });
+  });
+}
+
+// ══════════════════════════════════════════════
+// 이미지 → 텍스트 변환 (Puter img2txt 활용)
+// ══════════════════════════════════════════════
+async function analyzeImages(){
+  if(imgFiles.length===0&&vidFiles.length===0)return'';
+  const descs=[];
+
+  const VISION_PROMPT=`이 이미지를 한국 기업 소셜 미디어 리스크 관점에서 분석하세요.
+발견된 것만 구체적으로 서술하세요:
+1. 손 모양: 집게손(엄지+검지 집기), 손가락 개수(1~5개), V사인, OK사인
+2. 위험 조합: 손+소시지/핫도그/바나나/빨대/스틱형 오브젝트 동시 존재
+3. 군사·참사 이미지: 탱크, 총기, 헬멧, 군복, 배, 구명조끼, 항공기, 화재, 활주로
+4. 추모 상징: 노란 리본, 검은 리본, 촛불, 국화
+5. 숫자: 의상·소품·배경·자막에 보이는 모든 숫자 (특히 416, 518, 625, 1029, 1229)
+6. 색상: 빨강/파랑/노랑 단색이 화면 50% 이상 차지하는지
+7. 텍스트: 이미지 내 보이는 모든 글자
+8. 다방향 읽기: 텍스트를 가로·세로·대각선으로 읽었을 때 숨은 의미·혐오어·민감 조합
+이상 없으면 "이상 없음" 한 줄로.`;
+
+  // ── 이미지 분석 ─────────────────────────────
+  for(const f of imgFiles.slice(0,3)){
+    try{
+      const dataUrl=await toDataURL(f);
+      const resp=await puter.ai.chat(VISION_PROMPT,dataUrl,{model:'gpt-4o'});
+      const txt=typeof resp==='string'?resp:(resp?.message?.content||resp?.content||'');
+      if(txt&&!txt.includes('이상 없음'))
+        descs.push('[이미지: '+f.name+']\n'+txt.trim());
+    }catch(e){
+      descs.push('[이미지: '+f.name+'] 분석 불가 ('+e.message+') — 수동 검수 필요');
+    }
+  }
+
+  // ── 영상 분석: 6개 프레임 추출 후 각각 분석 ──
+  for(const f of vidFiles.slice(0,2)){
+    const lstep=document.getElementById('lstep');
+    if(lstep)lstep.textContent='영상 프레임 추출 중: '+f.name;
+    try{
+      const frames=await extractVideoFrames(f,6);
+      if(!frames||frames.length===0){
+        descs.push('[영상: '+f.name+'] 프레임 추출 실패 — 수동 검수 필요');
+        continue;
+      }
+      // 프레임별로 분석 후 리스크 있는 것만 수집
+      const frameDescs=[];
+      for(const fr of frames){
+        try{
+          const resp=await puter.ai.chat(
+            VISION_PROMPT+'\n이 프레임은 영상의 '+fr.time+'초 시점입니다.',
+            fr.dataUrl,
+            {model:'gpt-4o'}
+          );
+          const txt=typeof resp==='string'?resp:(resp?.message?.content||resp?.content||'');
+          if(txt&&!txt.includes('이상 없음'))
+            frameDescs.push(fr.time+'초: '+txt.trim());
+        }catch(fe){
+          // 개별 프레임 오류는 무시하고 계속
+        }
+      }
+      if(frameDescs.length>0)
+        descs.push('[영상: '+f.name+'] 총 '+frames.length+'개 프레임 분석\n'+frameDescs.join('\n'));
+      else
+        descs.push('[영상: '+f.name+'] '+frames.length+'개 프레임 분석 완료 — 시각적 리스크 없음');
+    }catch(e){
+      descs.push('[영상: '+f.name+'] 분석 불가 ('+e.message+') — 수동 검수 필요');
+    }
+  }
+
+  return descs.join('\n\n');
+}
+
+// ══════════════════════════════════════════════
+// AI 분석 실행
+// ══════════════════════════════════════════════
+async function runAnalysis(){
+  const caption=document.getElementById('caption').value.trim();
+  const channel=document.getElementById('channel').value;
+  const pubDate=document.getElementById('pubdate').value;
+  const chNames={instagram:'인스타그램',threads:'스레드',youtube:'유튜브',tiktok:'틱톡',blog:'블로그',facebook:'페이스북',twitter:'X(트위터)'};
+  const {dateAlerts,kwHits,combos,hidden}=lastAlerts;
+
+  document.getElementById('result').innerHTML=`<div class="card"><div class="loading"><div class="spinner"></div><p>AI가 콘텐츠를 분석하고 있습니다</p><div class="lstep" id="lstep">규칙 기반 검사 완료 — AI 심층 분석 중...</div></div></div>`;
+  const steps=['이미지·영상 프레임 분석 중...','텍스트 전체 정밀 검토 중...','리스크 항목 대조 중...','최종 등급 판정 생성 중...'];
+  let si=0;const iv=setInterval(()=>{const el=document.getElementById('lstep');if(el&&si<steps.length)el.textContent=steps[si++];},1800);
+
+  try{
+    // 이미지 분석
+    const imageDesc=await analyzeImages();
+
+    // 규칙 엔진 결과 → AI 프롬프트 주입
+    let ruleReport='';
+    if(dateAlerts.length>0){
+      ruleReport+='\n\n[규칙엔진: 텍스트 내 민감 날짜]\n';
+      dateAlerts.forEach(a=>{ruleReport+=`- "${a.raw}" = ${a.name}: ${a.desc}\n`;});
+    }
+    if(lastPubAlerts.length>0){
+      const d=new Date(pubDate);
+      ruleReport+='\n\n[규칙엔진: 발행 예정일 충돌]\n';
+      lastPubAlerts.forEach(a=>{ruleReport+=`- ${d.getMonth()+1}월 ${d.getDate()}일 = ${a.name} 전후: ${a.desc}\n`;});
+    }
+    if(kwHits.filter(h=>h.L>=2).length>0){
+      ruleReport+='\n\n[규칙엔진: 위험 키워드]\n';
+      kwHits.filter(h=>h.L>=2).forEach(h=>{ruleReport+=`- "${h.word}" = ${h.cat}\n`;});
+    }
+    if(combos.length>0){
+      ruleReport+='\n\n[규칙엔진: 조합 리스크]\n';
+      combos.forEach(h=>{ruleReport+=`- ${h.desc}\n`;});
+    }
+    if(hidden.length>0){
+      ruleReport+='\n\n[규칙엔진: 다방향 읽기 리스크]\n';
+      hidden.forEach(h=>{ruleReport+=`- [${h.type}] ${h.desc}\n`;});
+    }
+    if(imageDesc){ruleReport+=`\n\n[이미지 분석 결과]\n${imageDesc}`;}
+
+    const prompt=`당신은 한국 기업 소셜 미디어 콘텐츠 리스크 전문 검수 AI입니다.
+아래 정보를 분석하고 JSON만 반환하세요. 마크다운 코드블록 절대 금지.
+
+핵심 지침:
+- 캡션 전체를 처음부터 끝까지 빠짐없이 읽을 것
+- 날짜를 숫자형(518,416,1029,1229), 한글형(5월 18일), 슬래시형(5/18) 모두 탐지
+- 규칙 엔진 감지 항목은 반드시 결과에 포함
+- 문제 발견 시 "텍스트 어디서, 이미지 어느 부분"을 note에 명시
+- 날짜 리스크는 "X월 X일 = 무슨 사건"을 정확히 명시
+- 등급: 0=문제없음, 1=담당자확인, 2=팀장검수, 3=자동보류, 4=게시불가
+${ruleReport}
+
+채널: ${chNames[channel]}
+발행 예정일: ${pubDate}
+캡션 전문:
+${caption||'(없음)'}
+
+검수 항목: A.역사·참사·날짜 B.커뮤니티은어·극우표현 C.젠더·이미지리스크 D.혐오·차별 E.정치·이념·갈등 F.숫자·할인율 G.이미지·디자인 H.조합리스크 I.AI·저작권 J.맥락·DEI
+
+JSON:
+{"score":0~100,"level":0~4,"level_label":"레벨 설명","verdict":"발행 가능" 또는 "재검토 필요" 또는 "발행 보류" 또는 "게시 불가","verdict_reason":"구체적 이유","date_alerts":[{"date":"X월 X일","event":"사건명","risk":"리스크"}],"keyword_alerts":[{"keyword":"단어","category":"분류","risk":"설명"}],"combo_alerts":[{"combo":"조합","risk":"설명"}],"checks":[{"category":"항목명","items":[{"label":"세부항목","status":"pass|warn|fail|block|skip","level":"필수|주의|확인","note":"구체적 내용"}]}],"actions":["조치사항"]}`;
+
+    const resp=await puter.ai.chat(prompt,{model:'gpt-4o-mini'});
+    clearInterval(iv);
+    const raw=typeof resp==='string'?resp:(resp?.message?.content||resp?.content||'');
+    if(!raw)throw new Error('AI 응답이 비어있습니다.');
+    const jm=raw.replace(/```json|```/g,'').trim().match(/\{[\s\S]*\}/);
+    if(!jm)throw new Error('응답 파싱 오류. 다시 시도해주세요.');
+    renderResult(JSON.parse(jm[0]));
+  }catch(e){
+    clearInterval(iv);
+    const isAuth=e.message&&(e.message.includes('auth')||e.message.includes('login'));
+    document.getElementById('result').innerHTML=`<div class="card" style="text-align:center;padding:28px 20px">
+      <i class="ti ti-alert-circle" style="font-size:34px;color:var(--red);display:block;margin-bottom:10px"></i>
+      <p style="color:var(--red);font-weight:700;margin-bottom:6px">분석 중 오류가 발생했습니다</p>
+      <p style="font-size:12px;color:var(--g4);margin-top:4px">${e.message}</p>
+      ${isAuth?`<p style="font-size:13px;color:var(--g6);margin-top:10px">Puter 로그인이 필요합니다.</p><button onclick="puter.auth.signIn().then(()=>location.reload())" style="margin-top:12px;padding:10px 20px;border-radius:8px;border:none;background:var(--navy);color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">Puter 로그인</button>`:''}
+      <button class="btn-reset" onclick="resetForm()" style="margin-top:12px">다시 시도</button>
+    </div>`;
+  }
+}
+
+// ══════════════════════════════════════════════
+// 결과 렌더링
+// ══════════════════════════════════════════════
+function renderResult(r){
+  const score=Math.round(r.score||0);
+  const lv=r.level??0;
+  const bc=lv===0?'pass':lv<=2?'warn':lv===3?'fail':'block';
+  const icon=bc==='pass'?'ti-circle-check':bc==='warn'?'ti-alert-triangle':bc==='fail'?'ti-ban':'ti-forbid-2';
+  const si={pass:'ti-check',warn:'ti-alert-triangle',fail:'ti-x',block:'ti-forbid-2',skip:'ti-minus'};
+  const lm={'필수':'req','주의':'caut','확인':'chk'};
+  const lc=['l0','l1','l2','l3','l4'];
+
+  let dateH='',kwH='',comboH='';
+  if((r.date_alerts||[]).length>0)
+    dateH=`<div class="alert-box date"><div class="alert-box-ttl"><i class="ti ti-calendar-exclamation"></i> 📅 날짜 리스크 상세</div><div class="alert-box-body">${r.date_alerts.map(a=>`<strong>📅 ${a.date} = ${a.event}</strong><br>${a.risk}`).join('<br><br>')}</div></div>`;
+  if((r.keyword_alerts||[]).length>0)
+    kwH=`<div class="alert-box keyword"><div class="alert-box-ttl"><i class="ti ti-alert-triangle"></i> ⚠️ 위험 키워드 상세</div><div class="alert-box-body">${r.keyword_alerts.map(a=>`<strong>"${a.keyword}"</strong> [${a.category}]<br>${a.risk}`).join('<br><br>')}</div></div>`;
+  if((r.combo_alerts||[]).length>0)
+    comboH=`<div class="alert-box combo"><div class="alert-box-ttl"><i class="ti ti-link"></i> 🔗 조합 리스크 상세</div><div class="alert-box-body">${r.combo_alerts.map(a=>`<strong>${a.combo}</strong><br>${a.risk}`).join('<br><br>')}</div></div>`;
+
+  let ch='';
+  (r.checks||[]).forEach(cat=>{
+    const its=(cat.items||[]).map(it=>`<div class="ci ${it.status||'skip'}"><i class="ti ${si[it.status]||'ti-minus'} ci-ico"></i><div><div class="ci-lbl">${it.label} <span class="tag ${lm[it.level]||'chk'}">${it.level}</span></div>${it.note?`<div class="ci-note">${it.note}</div>`:''}</div></div>`).join('');
+    ch+=`<div class="cgroup"><div class="cg-lbl">${cat.category}</div>${its}</div>`;
+  });
+
+  const acts=r.actions||[];
+  const aH=acts.length?`<div class="abox"><div class="abox-ttl"><i class="ti ti-list-check"></i> 즉시 조치 필요 사항</div><ul class="alist">${acts.map(a=>`<li>${a}</li>`).join('')}</ul></div>`:'';
+
+  document.getElementById('result').innerHTML=`
+    <div class="card">
+      <div class="banner ${bc}">
+        <i class="ti ${icon} bico"></i>
+        <div class="btxt"><div class="bv">${r.verdict}</div><div class="br">${r.verdict_reason||''}</div></div>
+        <div class="bs">${score}<span class="bsu">점</span></div>
+      </div>
+      <div class="level-badge ${lc[lv]||'l0'}"><i class="ti ti-layers" style="font-size:12px"></i> ${r.level_label||`Level ${lv}`}</div>
+      ${dateH}${kwH}${comboH}${ch}${aH}
+      <p class="res-foot">AI 분석 결과는 참고용이며 최종 판단은 담당자·조직장 확인 후 결정하세요</p>
+    </div>
+    <button class="btn-reset" onclick="resetForm()"><i class="ti ti-refresh" style="font-size:13px;vertical-align:-2px;margin-right:4px"></i> 새 콘텐츠 검수하기</button>`;
+}
+
+function resetForm(){
+  imgFiles.length=0;vidFiles.length=0;
+  ['img-prev','vid-prev'].forEach(id=>document.getElementById(id).innerHTML='');
+  ['img-box','vid-box'].forEach(id=>document.getElementById(id).classList.remove('on'));
+  document.getElementById('caption').value='';
+  document.getElementById('pubdate').value='';
+  document.getElementById('result').innerHTML='';
+  document.getElementById('img-status').textContent='';
+  ['alert-date','alert-keyword','alert-combo','alert-pubdate'].forEach(id=>document.getElementById(id).style.display='none');
+  document.getElementById('img-in').value='';
+  document.getElementById('vid-in').value='';
+  lastAlerts={dateAlerts:[],kwHits:[],combos:[],hidden:[]};
+  lastPubAlerts=[];
+  updateBtn();
+}
+</script>
+</body>
+</html>
